@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marea — El espacio donde el arte encuentra a todos</title>
+<meta name="description" content="Marea es el espacio donde el arte encuentra a todos: descubrí, aprendé y compartí arte. Inspirate, expresalo y conectá con una comunidad que crea y transforma.">
+<link rel="icon" type="image/svg+xml" href="img/logo-negro.svg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Asap:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="is-loading">
+
+<!-- Sprite de íconos: una sola fuente de verdad, recoloreable vía currentColor -->
+<svg style="display:none" aria-hidden="true">
+  <symbol id="icon-arrow" viewBox="0 0 24 24" fill="none"><path d="M7 17 17 7M9 7h8v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="icon-plus" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="icon-clock" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.2" stroke="currentColor" stroke-width="1.6"/><path d="M12 7.5V12l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="icon-pin" viewBox="0 0 24 24" fill="none"><path d="M12 21s-6.5-5.8-6.5-11A6.5 6.5 0 0 1 18.5 10c0 5.2-6.5 11-6.5 11Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.2" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="icon-chevron-left" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="icon-chevron-right" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="icon-chevron-down" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="icon-menu" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="icon-close" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="icon-facebook" viewBox="0 0 24 24"><path d="M14.5 21v-7h2.4l.4-3H14.5V9.2c0-.9.3-1.6 1.7-1.6h1.4V4.9c-.7-.1-1.6-.2-2.5-.2-2.6 0-4.3 1.5-4.3 4.4V11H8.5v3h2.3v7h3.7Z" fill="currentColor"/></symbol>
+  <symbol id="icon-instagram" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="4.5" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="3.4" stroke="currentColor" stroke-width="1.6"/><circle cx="16.6" cy="7.4" r="1" fill="currentColor"/></symbol>
+  <symbol id="icon-youtube" viewBox="0 0 24 24"><rect x="3" y="6.5" width="18" height="11" rx="3.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M11 10.2v3.6l3.2-1.8z" fill="currentColor"/></symbol>
+  <symbol id="icon-x-social" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5 5 19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="icon-abba" viewBox="0 0 24 24" fill="none"><rect x="3.5" y="3.5" width="17" height="17" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M8 7.5v9M12 7.5v9M16 7.5v9" stroke="currentColor" stroke-width="1.5"/></symbol>
+</svg>
+
+<a class="skip-link" href="#main">Saltar al contenido</a>
+
+<header class="site-header" data-header id="top">
+  <div class="container site-header__inner">
+    <a class="site-header__logo" href="#top" aria-label="Marea, inicio">
+      <img src="img/logo-negro.svg" alt="Marea" width="132" height="29">
+    </a>
+
+    <nav class="site-header__nav" aria-label="Navegación principal" data-nav>
+      <a class="site-header__link" href="#mira">Mirá</a>
+      <a class="site-header__link" href="#crea">Creá</a>
+      <a class="site-header__link" href="#mostra">Mostrá</a>
+      <a class="site-header__link" href="#aprende">Aprendé</a>
+    </nav>
+
+    <div class="site-header__actions">
+      <a class="btn btn--primary btn--sm" href="#mostra-cta">Subí tu obra<svg class="btn__icon" aria-hidden="true"><use href="#icon-plus"/></svg></a>
+      <button class="site-header__burger" type="button" data-menu-toggle aria-label="Abrir menú" aria-expanded="false" aria-controls="mobile-nav">
+        <svg aria-hidden="true"><use href="#icon-menu"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <nav class="mobile-nav" id="mobile-nav" aria-label="Navegación móvil" data-mobile-nav hidden>
+    <a href="#mira">Mirá</a>
+    <a href="#crea">Creá</a>
+    <a href="#mostra">Mostrá</a>
+    <a href="#aprende">Aprendé</a>
+    <a class="btn btn--primary" href="#mostra-cta">Subí tu obra<svg class="btn__icon" aria-hidden="true"><use href="#icon-plus"/></svg></a>
+  </nav>
+  <div class="header-sentinel" data-header-sentinel aria-hidden="true"></div>
+</header>
+
+<main id="main">
+
+  <!-- HERO -->
+  <section class="hero" data-hero>
+    <span class="hero__watermark" data-watermark aria-hidden="true"><span class="hero__watermark-text">Marea</span></span>
+    <div class="container hero__inner">
+      <p class="eyebrow hero__eyebrow" style="--delay:0ms">B I E N V E N I D O S&nbsp; A</p>
+      <h1 class="hero__title" style="--delay:80ms">
+        <span class="hero__title-line" data-typing>El espacio donde el arte</span>
+        <span class="hero__title-line hero__title-line--bold"><span class="word">encuentra</span> <span class="word">a</span> <span class="word">todos</span></span>
+      </h1>
+      <p class="text-lead hero__lead" style="--delay:220ms">Un lugar para descubrir, aprender y compartir arte. Para inspirarte, expresarlo y conectar con una comunidad que crea y transforma</p>
+      <div class="hero__ctas" style="--delay:320ms">
+        <a class="btn btn--primary" href="#mira">Descubrí contenidos<svg class="btn__icon" aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+        <a class="btn btn--secondary" href="#newsletter">Sumate a la comunidad<svg class="btn__icon" aria-hidden="true"><use href="#icon-plus"/></svg></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 01. MIRÁ -->
+  <section class="mira" id="mira" aria-label="01. Mirá">
+    <!-- Experiencia horizontal: 6 paneles (Mirá intro + Renacimiento/Barroco), hijack de scroll en desktop / scroll nativo en touch -->
+    <div class="hscroll" id="mira-experiencia" data-hscroll>
+      <div class="hscroll__viewport">
+
+        <div class="mira-bar" data-hscroll-nav aria-label="Línea de tiempo Renacimiento y Barroco">
+          <p class="eyebrow mira-bar__index" data-hscroll-index>01.</p>
+          <div class="mira-bar__tabs">
+            <div class="mira-bar__tab" data-era="renacimiento">
+              <button type="button" data-bar-toggle aria-expanded="false">Renacimiento<svg aria-hidden="true"><use href="#icon-chevron-down"/></svg></button>
+              <ul class="mira-bar__dropdown">
+                <li><button type="button" data-target="renacimiento">1400 · Renacimiento</button></li>
+                <li><button type="button" data-target="perfeccion">Perfección y conocimiento</button></li>
+                <li><button type="button" data-target="obras-destacadas">Obras destacadas</button></li>
+              </ul>
+            </div>
+            <div class="mira-bar__tab" data-era="barroco">
+              <button type="button" data-bar-toggle aria-expanded="false">Barroco<svg aria-hidden="true"><use href="#icon-chevron-down"/></svg></button>
+              <ul class="mira-bar__dropdown">
+                <li><button type="button" data-target="barroco">1600 · Barroco</button></li>
+                <li><button type="button" data-target="espectaculo">Espectáculo y emoción</button></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="hscroll__track" data-hscroll-track>
+
+          <article class="mira-panel mira-panel--intro" data-panel="intro" data-index="01." data-reveal>
+            <div class="mira-intro__head">
+              <h3 class="text-h1">Mirá</h3>
+              <p class="text-body">La pintura, a través del tiempo, es un arte que ha evolucionado con el hombre y a lo largo de cientos de años ha marcado la historia y la cultura de la humanidad.</p>
+            </div>
+            <button type="button" class="link-cta mira-intro__cta" data-goto="renacimiento">Deslizá y conocé más<svg aria-hidden="true"><use href="#icon-arrow"/></svg></button>
+
+            <div class="mira-intro__media" aria-hidden="true">
+              <img class="mira-intro__img mira-intro__img--onirica" src="img/obras/collage-figura-onirica.jpg" alt="" loading="lazy">
+              <img class="mira-intro__img mira-intro__img--gericault" src="img/obras/gericault-balsa-de-la-medusa.jpg" alt="" loading="lazy">
+              <img class="mira-intro__img mira-intro__img--miguelangel" src="img/obras/miguel-angel-creacion-de-adan.jpg" alt="" loading="lazy">
+              <img class="mira-intro__img mira-intro__img--degas" src="img/obras/degas-clase-de-danza.jpg" alt="" loading="lazy">
+              <img class="mira-intro__img mira-intro__img--vermeer" src="img/obras/vermeer-joven-de-la-perla.jpg" alt="" loading="eager">
+            </div>
+
+            <p class="text-subtitle mira-intro__subtitle">Un lugar<br><strong>para descubrir</strong></p>
+            <p class="text-body mira-intro__caption">Conocer algunas de las mejores pinturas de la historia nos permite apreciar la belleza, la creatividad y el talento de sus autores, así como entender el contexto y el mensaje que quisieron transmitir.</p>
+          </article>
+
+          <article class="mira-panel mira-panel--renacimiento" data-panel="renacimiento" data-index="02." data-reveal>
+            <span class="mira-panel__bignum" aria-hidden="true">1400</span>
+            <div class="mira-panel__body">
+              <h3 class="text-h2"><span class="is-accent-lime">Renacimiento:</span><br>El mundo vuelve a ser observado</h3>
+              <p class="text-body">Durante el Renacimiento, Europa experimentó profundos cambios culturales. El interés por el conocimiento, la ciencia y la observación impulsó una nueva forma de entender la realidad. Los artistas comenzaron a estudiar el cuerpo humano, la naturaleza y la perspectiva para representar el mundo con mayor precisión.</p>
+            </div>
+            <img class="mira-panel__side-img" src="img/obras/della-francesca-flagelacion-de-cristo.jpg" alt="La flagelación de Cristo, Piero della Francesca" loading="lazy">
+          </article>
+
+          <article class="mira-panel mira-panel--perfeccion" data-panel="perfeccion" data-index="03." data-reveal>
+            <figure class="mira-panel__figure">
+              <img src="img/obras/della-francesca-flagelacion-de-cristo.jpg" alt="La flagelación de Cristo, Piero della Francesca" loading="lazy">
+              <figcaption><strong>La flagelación de Cristo</strong><em>Piero della Francesca</em></figcaption>
+            </figure>
+            <div class="mira-panel__cols">
+              <div>
+                <h3 class="text-h3">La búsqueda de la perfección</h3>
+                <p class="text-body">Durante el Renacimiento, los artistas estudiaron matemáticas, anatomía y arquitectura para comprender mejor el mundo que los rodeaba. La pintura dejó de ser únicamente una herramienta de representación religiosa y comenzó a convertirse en una forma de investigación visual. Cada detalle era cuidadosamente pensado para lograr equilibrio, armonía y realismo.</p>
+                <p class="text-body">La incorporación de la perspectiva permitió crear profundidad sobre superficies planas, generando escenas más creíbles y envolventes. Esta innovación transformó la manera en que las personas observaban las imágenes y marcó un antes y un después en la historia del arte.</p>
+              </div>
+              <div>
+                <h3 class="text-h3">Arte, ciencia y conocimiento</h3>
+                <p class="text-body">Los artistas renacentistas no trabajaban únicamente como pintores. Muchos de ellos fueron también inventores, arquitectos, ingenieros y estudiosos de la naturaleza. La curiosidad por comprender el funcionamiento del cuerpo humano, los fenómenos naturales y las leyes de la proporción impulsó nuevas formas de creación.</p>
+                <p class="text-body">Figuras como Leonardo da Vinci representan este espíritu de exploración, donde el arte y el conocimiento avanzaban juntos. Las obras producidas durante este período reflejan una época en la que observar, aprender y experimentar eran partes fundamentales del proceso creativo.</p>
+              </div>
+            </div>
+          </article>
+
+          <article class="mira-panel mira-panel--obras-destacadas" data-panel="obras-destacadas" data-index="04." data-reveal>
+            <h3 class="text-h3 mira-panel__heading">Obras destacadas</h3>
+            <div class="mira-panel__grid">
+              <figure>
+                <img src="img/obras/madonna-del-prato.jpg" alt="Madonna del Prato, Giovanni Bellini" loading="lazy">
+                <figcaption><strong>Madonna del Prato</strong><em>Giovanni Bellini</em></figcaption>
+              </figure>
+              <figure>
+                <img src="img/obras/miguel-angel-juicio-final.jpg" alt="El Juicio Final, Michelangelo" loading="lazy">
+                <figcaption><strong>El Juicio Final</strong><em>Michelangelo</em></figcaption>
+              </figure>
+              <figure>
+                <img src="img/obras/rafael-baltasar-castiglione.jpg" alt="Retrato de Baltasar Castiglione, Rafael" loading="lazy">
+                <figcaption><strong>Retrato de Baltasar Castiglione</strong><em>Rafael</em></figcaption>
+              </figure>
+            </div>
+          </article>
+
+          <article class="mira-panel mira-panel--barroco" data-panel="barroco" data-index="05." data-reveal>
+            <div class="mira-panel__split-img">
+              <img data-parallax src="img/obras/gentileschi-judith-holofernes.jpg" alt="Judith decapitando a Holofernes, Artemisia Gentileschi" loading="lazy">
+            </div>
+            <div class="mira-panel__split-text">
+              <p class="eyebrow">XVI -XVIII</p>
+              <h3 class="text-h1">Barroco:<br>La emoción<br>entra en escena</h3>
+            </div>
+          </article>
+
+          <article class="mira-panel mira-panel--espectaculo" data-panel="espectaculo" data-index="06." data-reveal>
+            <span class="mira-panel__bignum" aria-hidden="true">1600</span>
+            <div class="mira-panel__body mira-panel__body--espectaculo">
+              <h3 class="text-h3 is-accent-lime">El arte como espectáculo</h3>
+              <div class="mira-panel__text-col">
+                <p class="text-body">Durante el Barroco, las obras comenzaron a construirse como verdaderas escenas teatrales. Los artistas utilizaron composiciones complejas, perspectivas profundas y fuertes contrastes para crear imágenes llenas de energía. La pintura dejó de ser una ventana tranquila hacia el mundo y se transformó en un escenario donde cada elemento cumplía una función narrativa. La luz, el color y el movimiento trabajaban juntos para dirigir la mirada del espectador y aumentar la intensidad de la escena representada.</p>
+                <p class="text-body">La pintura dejó de ser una ventana tranquila hacia el mundo y se transformó en un escenario donde la narrativa ocupaba un lugar central. Los personajes ya no aparecían inmóviles ni distantes; sus gestos, posturas y expresiones transmitían tensión, sorpresa, dolor o entusiasmo. La escena parecía desarrollarse frente a los ojos del observador.</p>
+                <p class="text-body">La luz, el color y el movimiento trabajaban juntos para dirigir la mirada hacia los momentos más importantes de la composición. Las diagonales reemplazaron la estabilidad de las estructuras renacentistas, generando una sensación constante de dinamismo. Incluso en las escenas más silenciosas, existía una fuerte carga dramática que invitaba al espectador a involucrarse emocionalmente. El Barroco comprendió que una imagen podía ser mucho más que una representación de la realidad. <strong>Podía convertirse en una experiencia capaz de emocionar, sorprender y permanecer en la memoria de los espectadores.</strong></p>
+              </div>
+              <aside class="callout">
+                <span class="callout__icon" aria-hidden="true">✱</span>
+                <p><strong>Dato destacado:</strong></p>
+                <p>Los artistas barrocos utilizaban la luz como un director utiliza un reflector: para indicar exactamente dónde mirar.</p>
+              </aside>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MARQUEE: próxima intervención -->
+  <div class="marquee marquee--lime" data-marquee aria-hidden="true">
+    <div class="marquee__track">
+      <span class="marquee__item">Próxima intervención 19/7, Caballito <span class="marquee__sep">✱</span></span>
+      <span class="marquee__item">Próxima intervención 19/7, Caballito <span class="marquee__sep">✱</span></span>
+      <span class="marquee__item">Próxima intervención 19/7, Caballito <span class="marquee__sep">✱</span></span>
+      <span class="marquee__item">Próxima intervención 19/7, Caballito <span class="marquee__sep">✱</span></span>
+    </div>
+  </div>
+
+  <!-- 02. CREÁ -->
+  <section class="crea" id="crea" aria-label="02. Creá">
+    <div class="container">
+      <div class="crea__head" data-reveal>
+        <div>
+          <p class="eyebrow">02.</p>
+          <h2 class="text-h1">Creá</h2>
+          <p class="text-lead">Participá de talleres, charlas, recorridos y actividades.</p>
+        </div>
+        <div class="crea-month" data-crea-month>
+          <button type="button" class="crea-month__arrow" data-crea-prev aria-label="Mes anterior">
+            <svg aria-hidden="true"><use href="#icon-chevron-left"/></svg>
+          </button>
+          <span data-crea-month-label>Junio 2026</span>
+          <button type="button" class="crea-month__arrow" data-crea-next aria-label="Mes siguiente">
+            <svg aria-hidden="true"><use href="#icon-chevron-right"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="crea-deck" data-crea-deck data-reveal>
+      <ul class="crea-deck__list">
+
+        <li class="crea-card" data-month="Junio 2026" data-date="22/06/2026">
+          <span class="crea-card__tag">Surrealismo</span>
+          <p class="crea-card__day">Lun</p>
+          <p class="crea-card__date"><strong>22</strong> JUN</p>
+          <h3 class="text-h3">Taller Ilustrar sueños</h3>
+          <p class="text-body">Un taller para explorar la ilustración narrativa a partir de sueños, recuerdos e imaginación. A través de ejercicios y búsquedas visuales, cada participante desarrollará una pieza propia inspirada en escenas reales o imaginadas. No se requiere experiencia previa.</p>
+          <div class="crea-card__meta">
+            <span><svg aria-hidden="true"><use href="#icon-clock"/></svg>22/06/2026 · 10:00 am</span>
+            <span><svg aria-hidden="true"><use href="#icon-pin"/></svg>Prisma, Amigos del Bellas Artes - Av. Figueroa Alcorta 2270</span>
+          </div>
+          <a class="link-cta" href="#">Ver actividad<svg aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+        </li>
+
+        <li class="crea-card" data-month="Junio 2026" data-date="23/06/2026">
+          <span class="crea-card__tag">Expresionismo</span>
+          <p class="crea-card__day">Mar</p>
+          <p class="crea-card__date"><strong>23</strong> JUN</p>
+          <h3 class="text-h3">El autorretrato como construcción</h3>
+          <p class="text-body">Analizaremos la obra de artistas como Vivian Maier, Nan Goldin y Cindy Sherman. Exploraremos la singular visión que los llevó a utilizar su propio cuerpo y rostro como soporte y herramienta para construcción de su identidad artística.</p>
+          <div class="crea-card__meta">
+            <span><svg aria-hidden="true"><use href="#icon-clock"/></svg>22/06/2026 · 10:00 am</span>
+            <span><svg aria-hidden="true"><use href="#icon-pin"/></svg>Prisma, Amigos del Bellas Artes - Av. Figueroa Alcorta 2270</span>
+          </div>
+          <a class="link-cta" href="#">Ver actividad<svg aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+        </li>
+
+        <li class="crea-card" data-month="Junio 2026" data-date="27/06/2026">
+          <span class="crea-card__tag">Arte urbano</span>
+          <p class="crea-card__day">Sáb</p>
+          <p class="crea-card__date"><strong>27</strong> JUN</p>
+          <h3 class="text-h3">El arte en espacios públicos</h3>
+          <p class="text-body">El arte contemporáneo lleva el arte más allá de museos mediante expresiones como el street art, el graffiti, el land art y las intervenciones urbanas. Estas manifestaciones transforman el espacio público en un lugar de encuentro.</p>
+          <div class="crea-card__meta">
+            <span><svg aria-hidden="true"><use href="#icon-clock"/></svg>22/06/2026 · 10:00 am</span>
+            <span><svg aria-hidden="true"><use href="#icon-pin"/></svg>Prisma, Amigos del Bellas Artes - Av. Figueroa Alcorta 2270</span>
+          </div>
+          <a class="link-cta" href="#">Ver actividad<svg aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+        </li>
+
+        <li class="crea-card" data-month="Junio 2026" data-date="28/06/2026">
+          <span class="crea-card__tag">Ilustración digital</span>
+          <p class="crea-card__day">Dom</p>
+          <p class="crea-card__date"><strong>28</strong> JUN</p>
+          <h3 class="text-h3">Arte digital y videoarte</h3>
+          <p class="text-body">Las nuevas tecnologías le permitieron al arte contemporáneo incorporar nuevos formatos y recursos experimentales para reflexionar sobre conceptos y problemáticas tan diversas como la política, la sociedad de consumo, temas de género, entre otros.</p>
+          <div class="crea-card__meta">
+            <span><svg aria-hidden="true"><use href="#icon-clock"/></svg>22/06/2026 · 10:00 am</span>
+            <span><svg aria-hidden="true"><use href="#icon-pin"/></svg>Prisma, Amigos del Bellas Artes - Av. Figueroa Alcorta 2270</span>
+          </div>
+          <a class="link-cta" href="#">Ver actividad<svg aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+        </li>
+
+        <li class="crea-card" data-month="Julio 2026" data-date="01/07/2026">
+          <span class="crea-card__tag">Fotografía</span>
+          <p class="crea-card__day">Miér</p>
+          <p class="crea-card__date"><strong>01</strong> JUL</p>
+          <h3 class="text-h3">Fotografía documental: mirar la realidad</h3>
+          <p class="text-body">Un recorrido para explorar la fotografía documental como herramienta de relato. A través de salidas de observación y ejercicios de encuadre, cada participante construirá una serie de imágenes propias inspiradas en historias cotidianas. No se requiere experiencia previa.</p>
+          <div class="crea-card__meta">
+            <span><svg aria-hidden="true"><use href="#icon-clock"/></svg>01/07/2026 · 10:00 am</span>
+            <span><svg aria-hidden="true"><use href="#icon-pin"/></svg>Prisma, Amigos del Bellas Artes - Av. Figueroa Alcorta 2270</span>
+          </div>
+          <a class="link-cta" href="#">Ver actividad<svg aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+        </li>
+
+        <li class="crea-card" data-month="Julio 2026" data-date="11/07/2026">
+          <span class="crea-card__tag">Escultura</span>
+          <p class="crea-card__day">Sáb</p>
+          <p class="crea-card__date"><strong>11</strong> JUL</p>
+          <h3 class="text-h3">Modelado en arcilla: del boceto al volumen</h3>
+          <p class="text-body">Analizaremos el paso del dibujo a la tercera dimensión a través de la obra de escultores como Auguste Rodin y Louise Bourgeois. Exploraremos cómo el volumen, la textura y el espacio transforman una idea en una forma física y habitable.</p>
+          <div class="crea-card__meta">
+            <span><svg aria-hidden="true"><use href="#icon-clock"/></svg>11/07/2026 · 10:00 am</span>
+            <span><svg aria-hidden="true"><use href="#icon-pin"/></svg>Prisma, Amigos del Bellas Artes - Av. Figueroa Alcorta 2270</span>
+          </div>
+          <a class="link-cta" href="#">Ver actividad<svg aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+        </li>
+
+        <li class="crea-card" data-month="Julio 2026" data-date="17/07/2026">
+          <span class="crea-card__tag">Arte sonoro</span>
+          <p class="crea-card__day">Vie</p>
+          <p class="crea-card__date"><strong>17</strong> JUL</p>
+          <h3 class="text-h3">Paisajes sonoros: el arte que se escucha</h3>
+          <p class="text-body">El arte contemporáneo también se experimenta con el oído. Las instalaciones sonoras y el field recording transforman ruidos cotidianos en composiciones que invitan a percibir el entorno de una manera nueva y más atenta.</p>
+          <div class="crea-card__meta">
+            <span><svg aria-hidden="true"><use href="#icon-clock"/></svg>17/07/2026 · 10:00 am</span>
+            <span><svg aria-hidden="true"><use href="#icon-pin"/></svg>Prisma, Amigos del Bellas Artes - Av. Figueroa Alcorta 2270</span>
+          </div>
+          <a class="link-cta" href="#">Ver actividad<svg aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+        </li>
+
+      </ul>
+    </div>
+  </section>
+
+  <!-- SECCIÓN DE FRASES -->
+  <section class="quotes" data-quotes aria-roledescription="carrusel de citas" aria-label="Frases sobre el arte">
+    <div class="quotes__slide" data-slide="0" data-pos="active" style="--slide-bg:var(--color-black); --slide-fg:var(--color-white); --slide-accent:var(--color-lime);">
+      <span class="quotes__mark" aria-hidden="true">&#10077;</span>
+      <p class="quotes__author" aria-hidden="true">Papa Francisco</p>
+      <div class="quotes__body">
+        <p class="quotes__quote">El arte no es un lujo, sino una necesidad del espíritu.</p>
+        <p class="quotes__text">No es huida, sino responsabilidad, invitación a la acción, llamada, grito.</p>
+        <p class="quotes__source"><strong>Basílica de San Pedro,</strong><br>Jubileo de los Artistas y del Mundo de la Cultura</p>
+      </div>
+    </div>
+    <div class="quotes__slide" data-slide="1" style="--slide-bg:var(--color-white); --slide-fg:var(--color-black); --slide-accent:var(--color-black);">
+      <span class="quotes__mark" aria-hidden="true">&#10077;</span>
+      <p class="quotes__author" aria-hidden="true">Lev Tolstói</p>
+      <div class="quotes__body">
+        <p class="quotes__quote">El arte no es placer ni la producción de objetos bellos;</p>
+        <p class="quotes__text">es un medio de unión entre los seres humanos, que los reúne en los mismos sentimientos, y es indispensable para la vida y el progreso de la humanidad.</p>
+        <p class="quotes__source"><strong>Rusia, 1897</strong><br>Libro «¿Qué es el arte?»</p>
+      </div>
+    </div>
+    <div class="quotes__slide" data-slide="2" style="--slide-bg:var(--color-lime); --slide-fg:var(--color-black); --slide-accent:var(--color-black);">
+      <span class="quotes__mark" aria-hidden="true">&#10077;</span>
+      <p class="quotes__author" aria-hidden="true">John Dewey</p>
+      <div class="quotes__body">
+        <p class="quotes__quote">La experiencia estética es una manifestación,</p>
+        <p class="quotes__text">un registro y una celebración de la vida de una civilización; un medio para promover su desarrollo y también el juicio último sobre la calidad de esa civilización</p>
+        <p class="quotes__source"><strong>Burlington, Vermont, Estados Unidos</strong><br>Libro: El arte como experiencia</p>
+      </div>
+    </div>
+
+    <div class="quotes__tabs" data-quotes-tabs aria-hidden="true">
+      <button type="button" class="quotes__tab"></button>
+      <button type="button" class="quotes__tab"></button>
+    </div>
+
+    <div class="quotes__nav">
+      <button type="button" class="quotes__arrow" data-go-prev aria-label="Cita anterior"><svg aria-hidden="true"><use href="#icon-chevron-left"/></svg></button>
+      <button type="button" class="quotes__arrow" data-go-next aria-label="Cita siguiente"><svg aria-hidden="true"><use href="#icon-chevron-right"/></svg></button>
+    </div>
+  </section>
+
+  <!-- 03. MOSTRÁ -->
+  <section class="mostra" id="mostra" aria-label="03. Mostrá">
+    <div class="container">
+      <div class="mostra__head" data-reveal>
+        <p class="eyebrow">03.</p>
+        <h2 class="text-h1">Mostrá</h2>
+        <a class="link-cta mostra__head-cta" href="#mostra-galeria">Deslizá y conocé más<svg aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+      </div>
+
+      <p class="text-subtitle mostra__subtitle" data-reveal>Las obras inspiran.<br>Las historias las hacen inolvidables.</p>
+
+      <div class="mostra__grid" id="mostra-galeria">
+        <div class="mostra__col" data-reveal>
+          <p class="text-body">El arte cobra un significado especial cuando encuentra un espacio donde puede ser visto, interpretado y apreciado por otras personas. Por eso, en nuestra comunidad, te ofrecemos la posibilidad de compartir tus obras y formar parte de un entorno pensado para artistas, estudiantes, aficionados y amantes del arte que buscan descubrir nuevas miradas e inspirarse mutuamente.</p>
+          <p class="text-body">Ya sea una pintura, ilustración, fotografía, obra digital, collage o cualquier otra expresión creativa, este espacio está diseñado para que puedas mostrar tu trabajo y conectarte con personas que comparten tu pasión. Cada obra cuenta una historia, transmite emociones y refleja una visión única del mundo; al compartirla, contribuís a enriquecer una comunidad construida a partir de la diversidad de estilos, técnicas e ideas.</p>
+          <p class="text-body">Publicar tu arte es simple. Solo tenés que subir tu obra, agregar una breve descripción y compartir aquello que te inspiró durante el proceso creativo. De esta manera, otros usuarios podrán conocer más sobre tu trabajo, interactuar con tus publicaciones y descubrir el recorrido detrás de cada creación.</p>
+        </div>
+
+        <div class="mostra__col" data-reveal>
+          <p class="text-body">Creemos que el arte es una herramienta de expresión, aprendizaje y encuentro. Por eso, fomentamos un espacio respetuoso donde cada artista pueda desarrollarse, recibir reconocimiento por su trabajo y encontrar inspiración en las producciones de otros miembros de la comunidad.</p>
+          <p class="text-body">Cada obra tiene una historia única detrás de su creación. Por eso, además de compartir tus trabajos, podés contar qué te inspiró, cómo fue tu proceso creativo o qué significado tiene la pieza para vos. Estas historias enriquecen la experiencia de la comunidad, permiten conocer mejor a cada artista y generan conexiones más profundas entre quienes crean y quienes observan.</p>
+          <p class="text-body">Animate a compartir tu creatividad, descubrir nuevas perspectivas y ser parte de una red de artistas que crece todos los días. Tu próxima obra puede inspirar a alguien más.</p>
+        </div>
+
+        <aside class="mostra__obra" data-reveal data-tilt>
+          <p class="eyebrow">Obras del mes</p>
+          <img src="img/obras/gomez-ultima-luz.jpg" alt="«Última luz», obra de Ulises Gómez" loading="lazy">
+          <p class="mostra__obra-title">«Última luz»<em>Obra de Ulises Gómez</em></p>
+          <p class="text-body">Pinté esta obra después de regresar a mi pueblo natal tras varios años viviendo en la ciudad. Al volver, descubrí una tranquilidad que había olvidado. Quise capturar ese instante preciso en el que el viento parece detenerse, los sonidos se vuelven más suaves y el tiempo transcurre de una manera diferente.</p>
+          <p class="text-body">Mientras trabajaba en esta pintura recordé tardes enteras observando cómo cambiaban los colores del campo al final del día. Más que representar un lugar específico, la obra busca transmitir una sensación: la de volver a conectar con los recuerdos, con la naturaleza y con aquellos espacios que, incluso después de muchos años, siguen haciéndonos sentir en casa. Para mí, esta pintura es un homenaje a esos paisajes que permanecen en la memoria.</p>
+        </aside>
+      </div>
+
+      <p class="text-destacado mostra__pullquote" data-reveal>Detrás de cada obra hay una historia que merece ser contada.</p>
+    </div>
+
+    <div class="marquee marquee--black" data-marquee aria-hidden="true">
+      <div class="marquee__track">
+        <span class="marquee__item">Amigos del Bellas Artes <span class="marquee__sep">✱</span></span>
+        <span class="marquee__item">Amigos del Bellas Artes <span class="marquee__sep">✱</span></span>
+        <span class="marquee__item">Amigos del Bellas Artes <span class="marquee__sep">✱</span></span>
+        <span class="marquee__item">Amigos del Bellas Artes <span class="marquee__sep">✱</span></span>
+      </div>
+    </div>
+
+    <div class="mostra__cta-band" id="mostra-cta">
+      <h2 class="text-h2">UNA COMUNIDAD <span class="is-underline">QUE</span> VALORA LA CREATIVIDAD</h2>
+      <div class="mostra__cta-frame">
+        <img class="mostra__cta-frame-img" src="img/Marco.svg" alt="" aria-hidden="true">
+        <a class="btn btn--primary" href="#newsletter">Subí tu obra<svg class="btn__icon" aria-hidden="true"><use href="#icon-plus"/></svg></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04. APRENDÉ -->
+  <section class="aprende" id="aprende" aria-label="04. Aprendé">
+    <div class="container aprende__head" data-reveal>
+      <p class="eyebrow">04.</p>
+      <h2 class="text-h1">Aprendé</h2>
+    </div>
+
+    <div class="aprende-tabs">
+      <div class="aprende-tab aprende-tab--lime">
+        <span class="aprende-tab__label">Por autor</span>
+        <a class="link-cta" href="#">Ver más<svg aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+      </div>
+      <div class="aprende-tab aprende-tab--white">
+        <span class="aprende-tab__label">Por color</span>
+        <a class="link-cta" href="#">Ver más<svg aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+      </div>
+      <div class="aprende-tab aprende-tab--black">
+        <span class="aprende-tab__label">Por estilo</span>
+        <a class="link-cta" href="#">Ver más<svg aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+      </div>
+      <div class="aprende-tab aprende-tab--magenta">
+        <span class="aprende-tab__label">Por año</span>
+        <a class="link-cta" href="#">Ver más<svg aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- NEWSLETTER -->
+  <section class="newsletter" id="newsletter">
+    <div class="container newsletter__inner" data-reveal>
+      <div>
+        <h2 class="text-h2">Recibí <span class="is-accent-magenta">arte</span> en tu bandeja de entrada</h2>
+        <p class="text-body">Enterate de actividades, convocatorias, novedades y mucho más.</p>
+      </div>
+      <form class="newsletter__form" data-newsletter-form novalidate>
+        <label class="sr-only" for="newsletter-email">Tu mail</label>
+        <input type="email" id="newsletter-email" name="email" placeholder="Tu mail" required>
+        <button class="btn btn--primary" type="submit">Suscribirse<svg class="btn__icon" aria-hidden="true"><use href="#icon-arrow"/></svg></button>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container site-footer__grid">
+    <div class="site-footer__brand">
+      <img src="img/logo-blanco.svg" alt="Marea" width="132" height="29">
+    </div>
+
+    <div class="site-footer__col">
+      <p class="eyebrow is-accent-lime">Con el apoyo de</p>
+      <p class="site-footer__abba"><svg aria-hidden="true"><use href="#icon-abba"/></svg>Amigos del Bellas Artes</p>
+    </div>
+
+    <nav class="site-footer__col" aria-label="Información">
+      <p class="eyebrow is-accent-lime">Información</p>
+      <a href="#">FAQ</a>
+      <a href="#">Sobre nosotros</a>
+      <a href="#">Comunidad</a>
+      <a href="#">Contacto</a>
+      <a href="#">Prensa</a>
+    </nav>
+
+    <nav class="site-footer__col" aria-label="Mapa de sitio">
+      <p class="eyebrow is-accent-lime">Mapa de sitio</p>
+      <a href="#mira">Mirá</a>
+      <a href="#crea">Creá</a>
+      <a href="#mostra">Mostrá</a>
+      <a href="#aprende">Aprendé</a>
+      <a href="#newsletter">Suscribite</a>
+    </nav>
+  </div>
+
+  <div class="container site-footer__bottom">
+    <p>Copyright © 2026 Marea</p>
+    <a href="#">Políticas de privacidad</a>
+    <a href="#">Términos y condiciones</a>
+    <div class="site-footer__social">
+      <a href="#" aria-label="Facebook"><svg aria-hidden="true"><use href="#icon-facebook"/></svg></a>
+      <a href="#" aria-label="Instagram"><svg aria-hidden="true"><use href="#icon-instagram"/></svg></a>
+      <a href="#" aria-label="YouTube"><svg aria-hidden="true"><use href="#icon-youtube"/></svg></a>
+      <a href="#" aria-label="X"><svg aria-hidden="true"><use href="#icon-x-social"/></svg></a>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js" defer></script>
+</body>
+</html>
