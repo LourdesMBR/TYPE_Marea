@@ -660,65 +660,74 @@ body:not(.is-loading) .hero__title-line--bold .word {
   .mostra__cta-frame { width: clamp(280px, 84vw, 560px); }
 }
 
-/* ---------- 11. 04 APRENDÉ ---------- */
+/* ---------- 11. 04 APRENDÉ — fichero de archivo con solapa ---------- */
 .aprende { padding-block: var(--section-padding-y); background: var(--color-white); overflow: hidden; }
 .aprende__head .text-h1 { margin-block: var(--space-3) var(--space-7); }
 
-/* Solapas editoriales: cintas con extremo en semicírculo real (radio = alto/2),
-   ancladas alternadamente a izquierda/derecha. Apiladas en flujo normal,
-   sin grid, sin acordeón, sin solape forzado por margin negativo. */
-.aprende-tabs {
-  position: relative; isolation: isolate;
+/* Pila de ficheros físicos: cada uno = solapa (sobresale arriba, no centrada)
+   + cuerpo (ancho completo). Se apilan sin espacio, el cuerpo de cada uno
+   queda mayormente tapado por el siguiente, salvo el último. */
+.aprende-folders {
+  position: relative;
   display: flex; flex-direction: column;
-  --h: clamp(150px, 17vw, 220px); /* alto de cada cinta */
-  --gap: clamp(20px, 3vw, 40px);  /* aire vertical entre cintas */
-  row-gap: var(--gap);
-}
-.aprende-tab {
-  position: relative; display: flex; flex-direction: column; justify-content: center;
-  gap: var(--space-2); transition: transform var(--dur-base) var(--ease-out);
-}
-
-/* ancladas a la izquierda (full-bleed), extremo derecho en semicírculo */
-.aprende-tab--lime,
-.aprende-tab--black {
-  width: 75%; height: var(--h); align-self: flex-start; align-items: flex-start; text-align: left;
-  padding: 0 var(--space-7) 0 var(--container-padding-x);
-  border-radius: 0 calc(var(--h) / 2) calc(var(--h) / 2) 0;
-}
-.aprende-tab--lime { background: var(--color-lime); color: var(--color-black); z-index: 4; }
-.aprende-tab--black { background: var(--color-black); color: var(--color-white); z-index: 2; }
-
-/* "Por color": sin relleno, solo texto flotando en el hueco entre lima y negro */
-.aprende-tab--white {
-  width: fit-content; align-self: flex-end; align-items: flex-end; text-align: right;
-  padding: var(--space-3) var(--container-padding-x);
-  color: var(--color-black); z-index: 3;
+  --tab-h: clamp(72px, 8vw, 100px);
+  --tab-w: clamp(240px, 30vw, 420px);
+  --body-h: clamp(190px, 20vw, 260px);
+  --reveal: clamp(32px, 4vw, 56px);
+  --radius: clamp(28px, 3.5vw, 44px);
+  margin-top: var(--tab-h);
 }
 
-/* última capa: full-bleed completo, sin curva */
-.aprende-tab--magenta {
-  width: 100%; height: var(--h); align-self: stretch; align-items: flex-end; text-align: right;
-  padding: 0 var(--container-padding-x);
-  background: var(--color-magenta); color: var(--color-white); z-index: 1; border-radius: 0;
+.aprende-folder {
+  position: relative; width: 94%; margin-inline: auto;
+  transition: transform var(--dur-base) var(--ease-out);
 }
+.aprende-folder + .aprende-folder { margin-top: calc(var(--reveal) - var(--body-h)); }
 
-/* se levanta como una ficha física: solo translateY + se adelanta */
-.aprende-tab:hover,
-.aprende-tab:focus-within { transform: translateY(-16px); z-index: 5; }
+.aprende-folder--lime    { --folder-bg: var(--color-lime);    --folder-fg: var(--color-black); }
+.aprende-folder--white   { --folder-bg: var(--color-white);   --folder-fg: var(--color-black); }
+.aprende-folder--black   { --folder-bg: var(--color-black);   --folder-fg: var(--color-white); }
+.aprende-folder--magenta { --folder-bg: var(--color-magenta); --folder-fg: var(--color-white); }
 
-.aprende-tab__label { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-h2); }
-.aprende-tab .link-cta { font-size: var(--fs-caption); }
+.aprende-folder__tab,
+.aprende-folder__body { background: var(--folder-bg); color: var(--folder-fg); }
+
+.aprende-folder--white .aprende-folder__tab,
+.aprende-folder--white .aprende-folder__body { border: 1.5px solid var(--color-black); }
+.aprende-folder--white .aprende-folder__tab { border-bottom: none; }
+
+.aprende-folder__tab {
+  position: absolute; top: calc(-1 * var(--tab-h)); width: var(--tab-w); height: var(--tab-h);
+  display: flex; flex-direction: column; justify-content: center; gap: var(--space-2);
+  padding-inline: var(--space-6); border-radius: var(--radius) var(--radius) 0 0;
+}
+.aprende-folder--tab-left .aprende-folder__tab { left: 0; }
+.aprende-folder--tab-right .aprende-folder__tab { right: 0; }
+
+.aprende-folder__body { width: 100%; height: var(--body-h); padding: var(--space-7); border-radius: var(--radius); }
+
+/* se levanta como una carpeta física: sube, se adelanta, revela su cuerpo. Sin escala. */
+.aprende-folder:hover,
+.aprende-folder:focus-within { transform: translateY(-16px); z-index: 10; }
+
+.aprende-folder__label { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-h2); }
+.aprende-folder .link-cta { font-size: var(--fs-caption); }
 
 @media (max-width: 1023px) {
-  .aprende-tabs { --h: clamp(130px, 19vw, 180px); --gap: clamp(18px, 3vw, 32px); }
-  .aprende-tab--lime, .aprende-tab--black { width: 80%; }
+  .aprende-folders {
+    --tab-h: clamp(64px, 9vw, 84px); --tab-w: clamp(220px, 36vw, 340px);
+    --body-h: clamp(170px, 24vw, 220px); --reveal: clamp(26px, 5vw, 44px);
+  }
 }
 
 @media (max-width: 767px) {
-  .aprende-tabs { --h: clamp(100px, 26vw, 132px); --gap: clamp(14px, 4vw, 22px); }
-  .aprende-tab--lime, .aprende-tab--black { width: 82%; padding-right: var(--space-5); }
-  .aprende-tab--white { padding-block: var(--space-2); }
+  .aprende-folder { width: 100%; }
+  .aprende-folders {
+    --tab-h: clamp(56px, 16vw, 72px); --tab-w: clamp(170px, 58vw, 240px);
+    --body-h: clamp(130px, 30vw, 170px); --reveal: clamp(20px, 6vw, 32px);
+    --radius: clamp(20px, 5vw, 28px);
+  }
+  .aprende-folder__label { font-size: var(--fs-h3); }
 }
 
 /* ---------- 12. NEWSLETTER ---------- */
