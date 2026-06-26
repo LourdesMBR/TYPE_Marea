@@ -219,7 +219,11 @@
             </div>
             <div class="mira-panel__split-text">
               <p class="eyebrow">XVI -XVIII</p>
-              <h3 class="text-h1">Barroco:<br>La emoción<br>entra en escena</h3>
+              <h3 class="text-h1" data-reveal>
+                <span class="mira-typing-line" data-typing-line="1">Barroco:</span><br>
+                <span class="mira-typing-line" data-typing-line="2">La emoción</span><br>
+                <span class="mira-typing-line" data-typing-line="3">entra en escena</span>
+              </h3>
             </div>
           </article>
 
@@ -380,7 +384,7 @@
       <span class="quotes__mark" aria-hidden="true">&#10077;</span>
       <p class="quotes__author" aria-hidden="true">Papa Francisco</p>
       <div class="quotes__body">
-        <p class="quotes__quote">El arte no es un lujo, sino una necesidad del espíritu.</p>
+        <p class="quotes__quote"><span class="sr-only">El arte no es un lujo, sino una necesidad del espíritu.</span><span class="quotes__quote-typed" aria-hidden="true"></span></p>
         <p class="quotes__text">No es huida, sino responsabilidad, invitación a la acción, llamada, grito.</p>
         <p class="quotes__source"><strong>Basílica de San Pedro,</strong><br>Jubileo de los Artistas y del Mundo de la Cultura</p>
       </div>
@@ -389,7 +393,7 @@
       <span class="quotes__mark" aria-hidden="true">&#10077;</span>
       <p class="quotes__author" aria-hidden="true">Lev Tolstói</p>
       <div class="quotes__body">
-        <p class="quotes__quote">El arte no es placer ni la producción de objetos bellos;</p>
+        <p class="quotes__quote"><span class="sr-only">El arte no es placer ni la producción de objetos bellos;</span><span class="quotes__quote-typed" aria-hidden="true"></span></p>
         <p class="quotes__text">es un medio de unión entre los seres humanos, que los reúne en los mismos sentimientos, y es indispensable para la vida y el progreso de la humanidad.</p>
         <p class="quotes__source"><strong>Rusia, 1897</strong><br>Libro «¿Qué es el arte?»</p>
       </div>
@@ -398,7 +402,7 @@
       <span class="quotes__mark" aria-hidden="true">&#10077;</span>
       <p class="quotes__author" aria-hidden="true">John Dewey</p>
       <div class="quotes__body">
-        <p class="quotes__quote">La experiencia estética es una manifestación,</p>
+        <p class="quotes__quote"><span class="sr-only">La experiencia estética es una manifestación,</span><span class="quotes__quote-typed" aria-hidden="true"></span></p>
         <p class="quotes__text">un registro y una celebración de la vida de una civilización; un medio para promover su desarrollo y también el juicio último sobre la calidad de esa civilización</p>
         <p class="quotes__source"><strong>Burlington, Vermont, Estados Unidos</strong><br>Libro: El arte como experiencia</p>
       </div>
@@ -417,29 +421,33 @@
 
   <!-- 03. MOSTRÁ -->
   <section class="mostra" id="mostra" aria-label="03. Mostrá">
-    <div class="container">
-      <div class="mostra__head" data-reveal>
-        <div>
-          <p class="eyebrow">03.</p>
-          <h2 class="text-h1">Mostrá</h2>
-        </div>
-        <a class="link-cta mostra__head-cta" href="#mostra-galeria">Deslizá y conocé más<svg aria-hidden="true"><use href="#icon-arrow"/></svg></a>
-      </div>
-
-      <p class="text-subtitle mostra__subtitle" data-reveal>Las obras inspiran.<br>Las historias las hacen inolvidables.</p>
-
-      <div class="mostra__grid" id="mostra-galeria">
-        <div class="mostra__col" data-reveal>
-          <p class="text-body">El arte cobra un significado especial cuando encuentra un espacio donde puede ser visto, interpretado y apreciado por otras personas. Por eso, en nuestra comunidad, te ofrecemos la posibilidad de compartir tus obras y formar parte de un entorno pensado para artistas, estudiantes, aficionados y amantes del arte que buscan descubrir nuevas miradas e inspirarse mutuamente.</p>
-          <p class="text-body">Ya sea una pintura, ilustración, fotografía, obra digital, collage o cualquier otra expresión creativa, este espacio está diseñado para que puedas mostrar tu trabajo y conectarte con personas que comparten tu pasión. Cada obra cuenta una historia, transmite emociones y refleja una visión única del mundo; al compartirla, contribuís a enriquecer una comunidad construida a partir de la diversidad de estilos, técnicas e ideas.</p>
-          <p class="text-body">Publicar tu arte es simple. Solo tenés que subir tu obra, agregar una breve descripción y compartir aquello que te inspiró durante el proceso creativo. De esta manera, otros usuarios podrán conocer más sobre tu trabajo, interactuar con tus publicaciones y descubrir el recorrido detrás de cada creación.</p>
+    <div class="container mostra__split">
+      <div class="mostra__main">
+        <div class="mostra__head" data-reveal>
+          <div>
+            <p class="eyebrow">03.</p>
+            <h2 class="text-h1">Mostrá</h2>
+          </div>
+          <a class="link-cta mostra__head-cta" href="#mostra-galeria">Deslizá y conocé más<svg aria-hidden="true"><use href="#icon-arrow"/></svg></a>
         </div>
 
-        <div class="mostra__col" data-reveal>
-          <p class="text-body">Creemos que el arte es una herramienta de expresión, aprendizaje y encuentro. Por eso, fomentamos un espacio respetuoso donde cada artista pueda desarrollarse, recibir reconocimiento por su trabajo y encontrar inspiración en las producciones de otros miembros de la comunidad.</p>
-          <p class="text-body">Cada obra tiene una historia única detrás de su creación. Por eso, además de compartir tus trabajos, podés contar qué te inspiró, cómo fue tu proceso creativo o qué significado tiene la pieza para vos. Estas historias enriquecen la experiencia de la comunidad, permiten conocer mejor a cada artista y generan conexiones más profundas entre quienes crean y quienes observan.</p>
-          <p class="text-body">Animate a compartir tu creatividad, descubrir nuevas perspectivas y ser parte de una red de artistas que crece todos los días. Tu próxima obra puede inspirar a alguien más.</p>
+        <p class="text-subtitle mostra__subtitle" data-reveal>Las obras inspiran.<br>Las historias las hacen inolvidables.</p>
+
+        <div class="mostra__grid" id="mostra-galeria">
+          <div class="mostra__col" data-reveal>
+            <p class="text-body">El arte cobra un significado especial cuando encuentra un espacio donde puede ser visto, interpretado y apreciado por otras personas. Por eso, en nuestra comunidad, te ofrecemos la posibilidad de compartir tus obras y formar parte de un entorno pensado para artistas, estudiantes, aficionados y amantes del arte que buscan descubrir nuevas miradas e inspirarse mutuamente.</p>
+            <p class="text-body">Ya sea una pintura, ilustración, fotografía, obra digital, collage o cualquier otra expresión creativa, este espacio está diseñado para que puedas mostrar tu trabajo y conectarte con personas que comparten tu pasión. Cada obra cuenta una historia, transmite emociones y refleja una visión única del mundo; al compartirla, contribuís a enriquecer una comunidad construida a partir de la diversidad de estilos, técnicas e ideas.</p>
+            <p class="text-body">Publicar tu arte es simple. Solo tenés que subir tu obra, agregar una breve descripción y compartir aquello que te inspiró durante el proceso creativo. De esta manera, otros usuarios podrán conocer más sobre tu trabajo, interactuar con tus publicaciones y descubrir el recorrido detrás de cada creación.</p>
+          </div>
+
+          <div class="mostra__col" data-reveal>
+            <p class="text-body">Creemos que el arte es una herramienta de expresión, aprendizaje y encuentro. Por eso, fomentamos un espacio respetuoso donde cada artista pueda desarrollarse, recibir reconocimiento por su trabajo y encontrar inspiración en las producciones de otros miembros de la comunidad.</p>
+            <p class="text-body">Cada obra tiene una historia única detrás de su creación. Por eso, además de compartir tus trabajos, podés contar qué te inspiró, cómo fue tu proceso creativo o qué significado tiene la pieza para vos. Estas historias enriquecen la experiencia de la comunidad, permiten conocer mejor a cada artista y generan conexiones más profundas entre quienes crean y quienes observan.</p>
+            <p class="text-body">Animate a compartir tu creatividad, descubrir nuevas perspectivas y ser parte de una red de artistas que crece todos los días. Tu próxima obra puede inspirar a alguien más.</p>
+          </div>
         </div>
+
+        <p class="text-destacado mostra__pullquote" data-reveal>Detrás de cada obra hay una historia que merece ser contada.</p>
       </div>
 
       <div class="mostra__obras" data-reveal>
@@ -462,8 +470,6 @@
           </li>
         </ul>
       </div>
-
-      <p class="text-destacado mostra__pullquote" data-reveal>Detrás de cada obra hay una historia que merece ser contada.</p>
     </div>
 
     <div class="marquee marquee--black" data-marquee aria-hidden="true">
@@ -476,7 +482,7 @@
     </div>
 
     <div class="mostra__cta-band" id="mostra-cta">
-      <h2 class="text-h2">UNA COMUNIDAD <span class="is-underline">QUE</span> VALORA LA CREATIVIDAD</h2>
+      <h2 class="text-h2" data-reveal>UNA COMUNIDAD <span class="is-underline">QUE</span> VALORA LA CREATIVIDAD</h2>
       <div class="mostra__cta-frame">
         <img class="mostra__cta-frame-img" src="img/Marco.svg" alt="" aria-hidden="true">
         <a class="btn btn--primary" href="#newsletter">Subí tu obra<svg class="btn__icon" aria-hidden="true"><use href="#icon-plus"/></svg></a>

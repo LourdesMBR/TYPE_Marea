@@ -77,8 +77,8 @@
       const rect = hero.getBoundingClientRect();
       const px = (e.clientX - rect.left) / rect.width - 0.5;
       const py = (e.clientY - rect.top) / rect.height - 0.5;
-      watermark.style.setProperty("--wm-x", `${(px * 28).toFixed(1)}px`);
-      watermark.style.setProperty("--wm-y", `${(py * 22).toFixed(1)}px`);
+      watermark.style.setProperty("--wm-x", `${(px * 90).toFixed(1)}px`);
+      watermark.style.setProperty("--wm-y", `${(py * 70).toFixed(1)}px`);
     });
     hero.addEventListener("pointerleave", () => {
       watermark.style.setProperty("--wm-x", "0px");
@@ -306,6 +306,23 @@
     let current = 0;
     const n = slides.length;
 
+    // texto real (accesible, en .sr-only) tipeado letra por letra en la copia aria-hidden
+    function typeQuote(slide) {
+      const typed = slide.querySelector(".quotes__quote-typed");
+      const full = slide.querySelector(".quotes__quote .sr-only")?.textContent || "";
+      if (!typed) return;
+      clearInterval(typed._typingTimer);
+      if (caps.reducedMotion) { typed.textContent = full; typed.classList.remove("is-typing"); return; }
+      typed.textContent = "";
+      typed.classList.add("is-typing");
+      let i = 0;
+      typed._typingTimer = setInterval(() => {
+        i++;
+        typed.textContent = full.slice(0, i);
+        if (i >= full.length) { clearInterval(typed._typingTimer); typed.classList.remove("is-typing"); }
+      }, 28);
+    }
+
     function render() {
       slides.forEach((slide, i) => {
         const rel = (i - current + n) % n;
@@ -319,6 +336,7 @@
       });
       section.style.setProperty("--slide-fg", data[current].fg);
       section.style.setProperty("--slide-accent", data[current].accent);
+      typeQuote(slides[current]);
     }
 
     function go(delta) { current = (current + delta + n) % n; render(); }
