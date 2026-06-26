@@ -814,16 +814,18 @@ body:not(.is-loading) .hero__title-line--bold .word {
 
 /* descendente (alto-izq → bajo-der): la curva vive en el quiebre superior */
 .aprende-band--desc .aprende-band__head  { border-radius: 0 var(--radius) 0 0; }
-.aprende-band--desc .aprende-band__shelf { border-radius: 0 var(--radius) 0 0; }
+.aprende-band--desc .aprende-band__shelf { border-radius: 0 0 0 0; }
 
 /* ascendente (bajo-izq → alto-der), espejada de la descendente: comparten la
    misma base inferior, la curva vive en el quiebre superior igual que arriba */
-.aprende-band--asc .aprende-band__shelf { border-radius: 0 var(--radius) 0 0; }
+.aprende-band--asc .aprende-band__shelf { border-radius: 0 0 0 0; }
 .aprende-band--asc .aprende-band__head {
   border-radius: var(--radius) 0 0 0;
   padding-inline: var(--space-6) var(--container-padding-x);
   align-items: flex-end; text-align: right;
 }
+
+.aprende-band--white   { --band-bg: #ffffff;    }
 
 .aprende-band--lime    { --band-bg: var(--color-lime);    --band-fg: var(--color-black); }
 .aprende-band--black   { --band-bg: var(--color-black);   --band-fg: var(--color-white); }
