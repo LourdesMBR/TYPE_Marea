@@ -122,11 +122,45 @@
             <button type="button" class="link-cta mira-intro__cta" data-goto="renacimiento">Deslizá y conocé más<svg aria-hidden="true"><use href="#icon-arrow"/></svg></button>
 
             <div class="mira-intro__media" aria-hidden="true">
-              <img class="mira-intro__img mira-intro__img--onirica" src="img/obras/collage-figura-onirica.jpg" alt="" loading="lazy">
-              <img class="mira-intro__img mira-intro__img--gericault" src="img/obras/gericault-balsa-de-la-medusa.jpg" alt="" loading="lazy">
-              <img class="mira-intro__img mira-intro__img--miguelangel" src="img/obras/miguel-angel-creacion-de-adan.jpg" alt="" loading="lazy">
-              <img class="mira-intro__img mira-intro__img--degas" src="img/obras/degas-clase-de-danza.jpg" alt="" loading="lazy">
-              <img class="mira-intro__img mira-intro__img--vermeer" src="img/obras/vermeer-joven-de-la-perla.jpg" alt="" loading="eager">
+              <div class="mira-intro__card mira-intro__card--onirica">
+                <img class="mira-intro__img" src="img/obras/collage-figura-onirica.jpg" alt="" loading="lazy">
+              </div>
+              <div class="mira-intro__card mira-intro__card--gericault">
+                <div class="mira-intro__card-inner">
+                  <img class="mira-intro__img mira-intro__card-face mira-intro__card-face--front" src="img/obras/gericault-balsa-de-la-medusa.jpg" alt="" loading="lazy">
+                  <div class="mira-intro__card-face mira-intro__card-face--back">
+                    <p class="mira-intro__card-title">La balsa de la Medusa</p>
+                    <p class="mira-intro__card-author">Théodore Géricault</p>
+                  </div>
+                </div>
+              </div>
+              <div class="mira-intro__card mira-intro__card--miguelangel">
+                <div class="mira-intro__card-inner">
+                  <img class="mira-intro__img mira-intro__card-face mira-intro__card-face--front" src="img/obras/miguel-angel-creacion-de-adan.jpg" alt="" loading="lazy">
+                  <div class="mira-intro__card-face mira-intro__card-face--back">
+                    <p class="mira-intro__card-title">La creación de Adán</p>
+                    <p class="mira-intro__card-author">Miguel Ángel</p>
+                  </div>
+                </div>
+              </div>
+              <div class="mira-intro__card mira-intro__card--degas">
+                <div class="mira-intro__card-inner">
+                  <img class="mira-intro__img mira-intro__card-face mira-intro__card-face--front" src="img/obras/degas-clase-de-danza.jpg" alt="" loading="lazy">
+                  <div class="mira-intro__card-face mira-intro__card-face--back">
+                    <p class="mira-intro__card-title">La clase de danza</p>
+                    <p class="mira-intro__card-author">Edgar Degas</p>
+                  </div>
+                </div>
+              </div>
+              <div class="mira-intro__card mira-intro__card--vermeer">
+                <div class="mira-intro__card-inner">
+                  <img class="mira-intro__img mira-intro__card-face mira-intro__card-face--front" src="img/obras/vermeer-joven-de-la-perla.jpg" alt="" loading="eager">
+                  <div class="mira-intro__card-face mira-intro__card-face--back">
+                    <p class="mira-intro__card-title">La joven de la perla</p>
+                    <p class="mira-intro__card-author">Johannes Vermeer</p>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <p class="text-subtitle mira-intro__subtitle">Un lugar<br><strong>para descubrir</strong></p>
@@ -385,8 +419,10 @@
   <section class="mostra" id="mostra" aria-label="03. Mostrá">
     <div class="container">
       <div class="mostra__head" data-reveal>
-        <p class="eyebrow">03.</p>
-        <h2 class="text-h1">Mostrá</h2>
+        <div>
+          <p class="eyebrow">03.</p>
+          <h2 class="text-h1">Mostrá</h2>
+        </div>
         <a class="link-cta mostra__head-cta" href="#mostra-galeria">Deslizá y conocé más<svg aria-hidden="true"><use href="#icon-arrow"/></svg></a>
       </div>
 
@@ -404,14 +440,27 @@
           <p class="text-body">Cada obra tiene una historia única detrás de su creación. Por eso, además de compartir tus trabajos, podés contar qué te inspiró, cómo fue tu proceso creativo o qué significado tiene la pieza para vos. Estas historias enriquecen la experiencia de la comunidad, permiten conocer mejor a cada artista y generan conexiones más profundas entre quienes crean y quienes observan.</p>
           <p class="text-body">Animate a compartir tu creatividad, descubrir nuevas perspectivas y ser parte de una red de artistas que crece todos los días. Tu próxima obra puede inspirar a alguien más.</p>
         </div>
+      </div>
 
-        <aside class="mostra__obra" data-reveal data-tilt>
-          <p class="eyebrow">Obras del mes</p>
-          <img src="img/obras/gomez-ultima-luz.jpg" alt="«Última luz», obra de Ulises Gómez" loading="lazy">
-          <p class="mostra__obra-title">«Última luz»<em>Obra de Ulises Gómez</em></p>
-          <p class="text-body">Pinté esta obra después de regresar a mi pueblo natal tras varios años viviendo en la ciudad. Al volver, descubrí una tranquilidad que había olvidado. Quise capturar ese instante preciso en el que el viento parece detenerse, los sonidos se vuelven más suaves y el tiempo transcurre de una manera diferente.</p>
-          <p class="text-body">Mientras trabajaba en esta pintura recordé tardes enteras observando cómo cambiaban los colores del campo al final del día. Más que representar un lugar específico, la obra busca transmitir una sensación: la de volver a conectar con los recuerdos, con la naturaleza y con aquellos espacios que, incluso después de muchos años, siguen haciéndonos sentir en casa. Para mí, esta pintura es un homenaje a esos paisajes que permanecen en la memoria.</p>
-        </aside>
+      <div class="mostra__obras" data-reveal>
+        <p class="eyebrow mostra__obras-eyebrow">Obras del mes</p>
+        <ul class="mostra__obras-deck">
+          <li class="mostra__obra-card" data-tilt>
+            <img src="img/obras/gomez-ultima-luz.jpg" alt="«Última luz», obra de Ulises Gómez" loading="lazy">
+            <p class="mostra__obra-title">«Última luz»<em>Ulises Gómez</em></p>
+            <p class="text-body">Pinté esta obra al volver a mi pueblo natal tras años en la ciudad. Quise capturar ese instante en el que el viento se detiene y el tiempo transcurre distinto: un homenaje a los paisajes que siguen haciéndonos sentir en casa.</p>
+          </li>
+          <li class="mostra__obra-card mostra__obra-card--lime">
+            <div class="mostra__obra-card-cover" aria-hidden="true"><span>Eco de barrio</span></div>
+            <p class="mostra__obra-title">«Eco de barrio»<em>Valentina Ríos</em></p>
+            <p class="text-body">Esta serie nace de caminar el mismo barrio durante un año, fotografiando paredes que cambian de mano en mano. Cada mural tapa al anterior, pero nunca del todo: siempre queda un borde, un color que se asoma.</p>
+          </li>
+          <li class="mostra__obra-card mostra__obra-card--magenta">
+            <div class="mostra__obra-card-cover" aria-hidden="true"><span>Raíces</span></div>
+            <p class="mostra__obra-title">«Raíces»<em>Tomás Aldao</em></p>
+            <p class="text-body">Trabajo con tierra y pigmentos que recojo en los viajes a la casa de mis abuelos. Las raíces no se ven, pero sostienen todo lo que sí vemos: quise fijar ese vínculo con la tierra de donde venimos.</p>
+          </li>
+        </ul>
       </div>
 
       <p class="text-destacado mostra__pullquote" data-reveal>Detrás de cada obra hay una historia que merece ser contada.</p>

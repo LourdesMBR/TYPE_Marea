@@ -35,6 +35,7 @@
     initCrea();
     initQuotes();
     initMostraTilt();
+    initMostraObras();
     initNewsletter();
 
     window.addEventListener("resize", debounce(() => {
@@ -207,7 +208,7 @@
       const barrocoIdx = mira.panels.findIndex((p) => p.dataset.panel === "barroco");
       const step = 1 / (mira.panels.length - 1);
       const local = clamp((progress - (barrocoIdx - 0.5) * step) / step, 0, 1);
-      mira.barrocoImg.style.transform = `translateY(${(local - 0.5) * 40}px)`;
+      mira.barrocoImg.style.transform = `translateY(${(local - 0.5) * 90}px)`;
     }
   }
 
@@ -331,22 +332,44 @@
 
   /* ---------- 03 Mostrá: tilt sutil ---------- */
   function initMostraTilt() {
-    const wrap = document.querySelector("[data-tilt]");
-    const img = wrap?.querySelector("img");
-    if (!wrap || !img) return;
+    document.querySelectorAll("[data-tilt]").forEach((wrap) => {
+      const img = wrap.querySelector("img");
+      if (!img) return;
 
-    wrap.addEventListener("pointermove", (e) => {
-      if (!caps.hoverFine) return;
-      const rect = img.getBoundingClientRect();
-      const px = (e.clientX - rect.left) / rect.width - 0.5;
-      const py = (e.clientY - rect.top) / rect.height - 0.5;
-      img.style.transition = "none";
-      img.style.transform = `rotateX(${(-py * 8).toFixed(2)}deg) rotateY(${(px * 8).toFixed(2)}deg) scale(1.03)`;
+      wrap.addEventListener("pointermove", (e) => {
+        if (!caps.hoverFine) return;
+        const rect = img.getBoundingClientRect();
+        const px = (e.clientX - rect.left) / rect.width - 0.5;
+        const py = (e.clientY - rect.top) / rect.height - 0.5;
+        img.style.transition = "none";
+        img.style.transform = `rotateX(${(-py * 8).toFixed(2)}deg) rotateY(${(px * 8).toFixed(2)}deg) scale(1.03)`;
+      });
+      wrap.addEventListener("pointerleave", () => {
+        img.style.transition = "transform 500ms var(--ease-out)";
+        img.style.transform = "rotateX(0) rotateY(0) scale(1)";
+      });
     });
-    wrap.addEventListener("pointerleave", () => {
-      img.style.transition = "transform 500ms var(--ease-out)";
-      img.style.transform = "rotateX(0) rotateY(0) scale(1)";
+  }
+
+  /* ---------- Obras del mes: deck horizontal, arrastre con mouse ---------- */
+  function initMostraObras() {
+    const list = document.querySelector(".mostra__obras-deck");
+    if (!list) return;
+    let drag = null;
+
+    list.addEventListener("pointerdown", (e) => {
+      if (e.pointerType !== "mouse") return;
+      drag = { startX: e.clientX, startScroll: list.scrollLeft };
+      list.classList.add("is-dragging");
+      list.setPointerCapture(e.pointerId);
     });
+    list.addEventListener("pointermove", (e) => {
+      if (!drag) return;
+      list.scrollLeft = drag.startScroll - (e.clientX - drag.startX);
+    });
+    const stopDrag = () => { drag = null; list.classList.remove("is-dragging"); };
+    list.addEventListener("pointerup", stopDrag);
+    list.addEventListener("pointercancel", stopDrag);
   }
 
   /* ---------- Newsletter ---------- */
