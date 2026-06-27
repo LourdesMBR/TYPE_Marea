@@ -1,7 +1,8 @@
 /* =========================================================
    MAREA — landing
    Módulos: capabilities · header · reveal · mira (hscroll+parallax)
-            · crea (deck drag) · quotes · mostra (tilt) · newsletter
+            · crea (deck drag) · quotes · mostra (tilt + obras) · newsletter
+            · cursor (circle-follow nativo)
    (aprendé: hover/focus-within puro en CSS, sin JS)
    ========================================================= */
 (() => {
@@ -37,10 +38,12 @@
     initMostraTilt();
     initMostraObras();
     initNewsletter();
+    initCursor();
 
     window.addEventListener("resize", debounce(() => {
       readCaps();
       refreshMira();
+      cursor?.refresh();
     }, 200));
   });
 
@@ -369,11 +372,41 @@
     });
   }
 
-  /* ---------- Obras del mes: deck horizontal, arrastre con mouse ---------- */
+  /* ---------- Obras del mes: deck horizontal, arrastre con mouse + dots ---------- */
   function initMostraObras() {
     const list = document.querySelector(".mostra__obras-deck");
     if (!list) return;
+    const cards = Array.from(list.querySelectorAll(".mostra__obra-card"));
+    const dotsWrap = document.querySelector("[data-obras-dots]");
     let drag = null;
+
+    // dots: uno por card, click para deslizar, activo según posición de scroll
+    let dots = [];
+    if (dotsWrap && cards.length > 1) {
+      dots = cards.map((card, i) => {
+        const dot = document.createElement("button");
+        dot.type = "button";
+        dot.className = "mostra__obras-dots__dot";
+        dot.setAttribute("aria-label", `Ir a la obra ${i + 1}`);
+        dot.addEventListener("click", () => {
+          list.scrollTo({ left: card.offsetLeft - list.offsetLeft, behavior: "smooth" });
+        });
+        dotsWrap.appendChild(dot);
+        return dot;
+      });
+    }
+
+    const step = () => (cards[1]?.offsetLeft ?? 0) - (cards[0]?.offsetLeft ?? 0) || 1;
+    function syncDots() {
+      if (!dots.length) return;
+      const maxScroll = list.scrollWidth - list.clientWidth;
+      const active = list.scrollLeft >= maxScroll - 1
+        ? cards.length - 1
+        : clamp(Math.round(list.scrollLeft / step()), 0, cards.length - 1);
+      dots.forEach((d, i) => d.classList.toggle("is-active", i === active));
+    }
+    list.addEventListener("scroll", syncDots, { passive: true });
+    syncDots();
 
     list.addEventListener("pointerdown", (e) => {
       if (e.pointerType !== "mouse") return;
@@ -388,6 +421,110 @@
     const stopDrag = () => { drag = null; list.classList.remove("is-dragging"); };
     list.addEventListener("pointerup", stopDrag);
     list.addEventListener("pointercancel", stopDrag);
+  }
+
+  /* ---------- Cursor personalizado: circle-follow nativo (sin GSAP) ---------- */
+  let cursor = null;
+  const CURSOR_TARGETS = "a, button, .cta, .btn";
+  // mapeo color de fondo real (rgb) -> color sólido que toma el cursor sobre él
+  const CURSOR_TINTS = [
+    { r: 0,   g: 255, b: 208, fill: "#F137A5" }, // turquesa (botón primario) -> magenta
+    { r: 206, g: 245, b: 100, fill: "#4100F5" }, // lima (banda/marquee)       -> azul
+    { r: 241, g: 55,  b: 166, fill: "#CEF564" }, // magenta (banda "Por año")  -> lima
+  ];
+
+  function cursorBgColor(el) {
+    let n = el;
+    while (n && n.nodeType === 1 && n !== document.documentElement) {
+      const m = getComputedStyle(n).backgroundColor.match(/rgba?\(([^)]+)\)/);
+      if (m) {
+        const p = m[1].split(",").map((v) => parseFloat(v));
+        if ((p[3] ?? 1) > 0) return { r: p[0], g: p[1], b: p[2] };
+      }
+      n = n.parentElement;
+    }
+    return null;
+  }
+  function cursorTintFor(el) {
+    if (el.closest?.("img, picture")) return "#FFFFFF"; // sobre fotos: sólido, no invierte
+    const c = cursorBgColor(el);
+    if (!c) return null;
+    for (const t of CURSOR_TINTS) {
+      if (Math.abs(c.r - t.r) < 6 && Math.abs(c.g - t.g) < 6 && Math.abs(c.b - t.b) < 6) return t.fill;
+    }
+    return null;
+  }
+
+  function initCursor() {
+    const root = document.querySelector("[data-cursor]");
+    if (!root) return;
+    const big = root.querySelector(".cursor__ball--big");
+    const small = root.querySelector(".cursor__ball--small");
+
+    const s = {
+      on: false, raf: null, visible: false,
+      tx: innerWidth / 2, ty: innerHeight / 2,
+      bx: innerWidth / 2, by: innerHeight / 2,
+      sx: innerWidth / 2, sy: innerHeight / 2,
+    };
+
+    function onMove(e) {
+      s.tx = e.clientX; s.ty = e.clientY;
+      if (!s.visible) { s.visible = true; root.classList.add("is-visible"); }
+    }
+    function applyTint(el) {
+      const fill = el && cursorTintFor(el);
+      if (fill) { root.style.setProperty("--cursor-fill", fill); root.classList.add("is-solid"); }
+      else { root.style.removeProperty("--cursor-fill"); root.classList.remove("is-solid"); }
+    }
+    function onLeave() {
+      s.visible = false;
+      root.classList.remove("is-visible", "is-solid");
+      root.style.removeProperty("--cursor-fill");
+    }
+    function onOver(e) {
+      if (e.target.closest?.(CURSOR_TARGETS)) root.classList.add("is-hovering");
+      applyTint(e.target); // recomputa el tinte al entrar a cada elemento
+    }
+    function onOut(e) {
+      if (!e.relatedTarget?.closest?.(CURSOR_TARGETS)) root.classList.remove("is-hovering");
+    }
+
+    // loop: la grande sigue con retardo (lerp 0.18), la chica de cerca (lerp 0.45)
+    function tick() {
+      s.bx += (s.tx - s.bx) * 0.18; s.by += (s.ty - s.by) * 0.18;
+      s.sx += (s.tx - s.sx) * 0.45; s.sy += (s.ty - s.sy) * 0.45;
+      big.style.transform = `translate3d(${(s.bx - 20).toFixed(2)}px, ${(s.by - 20).toFixed(2)}px, 0)`;
+      small.style.transform = `translate3d(${(s.sx - 5).toFixed(2)}px, ${(s.sy - 5).toFixed(2)}px, 0)`;
+      s.raf = requestAnimationFrame(tick);
+    }
+
+    function activate() {
+      if (s.on) return;
+      s.on = true;
+      document.body.classList.add("is-cursor-custom");
+      window.addEventListener("mousemove", onMove, { passive: true });
+      document.addEventListener("mouseleave", onLeave);
+      document.addEventListener("pointerover", onOver, { passive: true });
+      document.addEventListener("pointerout", onOut, { passive: true });
+      s.raf = requestAnimationFrame(tick);
+    }
+    function deactivate() {
+      if (!s.on) return;
+      s.on = false;
+      document.body.classList.remove("is-cursor-custom");
+      root.classList.remove("is-visible", "is-hovering", "is-solid");
+      root.style.removeProperty("--cursor-fill");
+      window.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseleave", onLeave);
+      document.removeEventListener("pointerover", onOver);
+      document.removeEventListener("pointerout", onOut);
+      if (s.raf) cancelAnimationFrame(s.raf);
+      s.raf = null;
+    }
+
+    cursor = { refresh: () => (caps.hoverFine && !caps.reducedMotion ? activate() : deactivate()) };
+    cursor.refresh();
   }
 
   /* ---------- Newsletter ---------- */

@@ -723,19 +723,21 @@ body:not(.is-loading) .hero__title-line--bold .word {
 /* ---------- 10. 03 MOSTRÁ ---------- */
 .mostra { background: var(--color-white); padding-block: var(--section-padding-y); }
 
-/* Texto a la izquierda, obras del mes a la derecha (no apiladas) */
+/* Texto a la izquierda, obras del mes a la derecha (no apiladas).
+   La columna de obras es más ancha que el texto para que entren dos cards a la vez. */
 .mostra__split { display: flex; gap: var(--space-8); align-items: flex-start; }
-.mostra__main { flex: 1 1 56%; min-width: 0; }
+.mostra__main { flex: 1 1 42%; min-width: 0; }
 
 .mostra__head { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--space-5); flex-wrap: wrap; }
 .mostra__head .text-h1 { margin-block: var(--space-3) 0; }
 .mostra__subtitle { margin-block: var(--space-7) var(--space-8); max-width: 30ch; }
 
-.mostra__grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); align-items: start; }
+/* una sola columna de texto */
+.mostra__grid { display: grid; grid-template-columns: 1fr; gap: var(--space-6); align-items: start; }
 .mostra__col .text-body + .text-body { margin-top: var(--space-5); }
 
 /* Obras del mes: deck horizontal con scroll, mismo patrón que el de Creá */
-.mostra__obras { flex: 1 1 40%; min-width: 0; }
+.mostra__obras { flex: 1 1 56%; min-width: 0; }
 .mostra__obras-eyebrow { color: var(--color-magenta); margin-bottom: var(--space-5); }
 .mostra__obras-deck {
   display: flex; gap: var(--space-6);
@@ -765,6 +767,16 @@ body:not(.is-loading) .hero__title-line--bold .word {
 .mostra__obra-title { font-family: var(--font-display); font-weight: 700; margin-bottom: var(--space-3); }
 .mostra__obra-title em { display: block; font-family: var(--font-body); font-weight: 400; font-style: italic; opacity: 0.7; font-size: var(--fs-caption); margin-top: 2px; }
 .mostra__obra-card .text-body { font-size: 0.88rem; }
+
+/* dots: indican y navegan las cards del deck */
+.mostra__obras-dots { display: flex; gap: var(--space-2); margin-top: var(--space-5); }
+.mostra__obras-dots__dot {
+  width: 9px; height: 9px; border-radius: 50%; padding: 0;
+  background: rgba(0,0,0,0.18); cursor: pointer;
+  transition: background var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
+}
+.mostra__obras-dots__dot:hover { background: rgba(0,0,0,0.4); }
+.mostra__obras-dots__dot.is-active { background: var(--color-magenta); transform: scale(1.25); }
 
 .mostra__pullquote { text-align: center; max-width: 720px; margin: var(--space-9) auto; }
 
@@ -801,7 +813,23 @@ body:not(.is-loading) .hero__title-line--bold .word {
   --head-w: 30%;
 }
 
-.aprende-band { display: flex; align-items: flex-end; }
+.aprende-band {
+  display: flex; align-items: flex-end;
+  /* la elevación es solo transform/filter (sin reflow): no mueve a las demás bandas */
+  transition: transform 0.35s cubic-bezier(.22, 1, .36, 1), filter 0.35s cubic-bezier(.22, 1, .36, 1);
+  will-change: transform;
+}
+/* cada banda se eleva de forma independiente al pasar el cursor. Usamos
+   filter:drop-shadow (no box-shadow) porque la banda es una silueta en L
+   —cabezal alto + repisa baja— y la sombra debe seguir su contorno real,
+   no el rectángulo contenedor con su esquina vacía. */
+@media (hover: hover) and (pointer: fine) {
+  .aprende-band:hover {
+    transform: translateY(-12px) scale(1.01);
+    z-index: 5;
+    filter: drop-shadow(0 16px 26px rgba(0, 0, 0, 0.22));
+  }
+}
 
 .aprende-band__head {
   flex: 0 0 var(--head-w);
@@ -891,3 +919,53 @@ body:not(.is-loading) .hero__title-line--bold .word {
   }
   .hero__title-line[data-typing] { width: auto !important; border-right: 0 !important; }
 }
+
+/* ---------- 14. CURSOR PERSONALIZADO (circle-follow, adaptado de ctf0 sin GSAP) ----------
+   Bola grande con retardo + bola chica que sigue de cerca, ambas con mix-blend-mode
+   difference para invertir el fondo (no depende de la paleta). JS añade .is-cursor-custom
+   al body solo en desktop con mouse fino y sin reduced-motion; la traslación la maneja
+   un loop rAF, el escalado en hover es transición CSS pura sobre el svg interno. */
+.cursor { display: none; }
+
+body.is-cursor-custom { cursor: none; }
+/* anula los cursores nativos (grab/pointer/text-pointer) mientras el personalizado está activo;
+   solo afecta la propiedad cursor, no el caret de edición dentro de inputs */
+body.is-cursor-custom * { cursor: none !important; }
+
+/* CLAVE: .cursor NO debe crear stacking context propio (sin position, z-index ni
+   opacity<1). Si lo hiciera, el mix-blend-mode de las bolas quedaría aislado y
+   dejaría de mezclarse con la tipografía/contenido de la página (se verían discos
+   blancos sólidos tapando el texto). Por eso el z-index vive en las bolas y la
+   aparición es por display, igual que en el CodePen de referencia. */
+body.is-cursor-custom .cursor.is-visible { display: block; pointer-events: none; }
+
+.cursor__ball {
+  position: fixed; top: 0; left: 0; z-index: 9999;
+  mix-blend-mode: difference; will-change: transform;
+}
+/* modo "tinte": color sólido exacto (blend normal) sobre superficies de marca y sobre
+   fotos. El difference invierte el fondo (no permite elegir un color arbitrario: el
+   inverso del turquesa es rojo, etc.); para tomar un color específico el cursor pasa a
+   ser opaco en esas zonas. El color lo fija JS según el fondo real bajo el cursor. */
+.cursor.is-solid .cursor__ball { mix-blend-mode: normal; }
+.cursor__ball circle { fill: var(--cursor-fill, var(--color-white)); }
+
+/* la bola grande crece de forma fluida al pasar sobre elementos interactivos */
+.cursor__ball--big { border-radius: 50%; }
+.cursor__ball--big svg { transform-origin: center; transition: transform var(--dur-base) var(--ease-out); }
+.cursor.is-hovering .cursor__ball--big svg { transform: scale(4); }
+/* en modo sólido el escalado es menor para que el disco opaco no tape el botón entero */
+.cursor.is-solid.is-hovering .cursor__ball--big svg { transform: scale(2); }
+
+/* ---------- Lente duotono magenta DENTRO del círculo, solo sobre fotos ----------
+   El círculo grande funciona como lente: con backdrop-filter tiñe en magenta (duotono)
+   sólo la porción de la imagen que tiene detrás, únicamente dentro del círculo, al pasar
+   por encima. Removible: quitá la clase fx-photo-duotone del <body> (sin ella, sobre
+   fotos el cursor queda como disco blanco neutro, sin invertir la imagen). */
+.cursor.is-photo .cursor__ball { mix-blend-mode: normal; }
+body.fx-photo-duotone .cursor.is-photo .cursor__ball--big {
+  -webkit-backdrop-filter: grayscale(1) sepia(1) saturate(3.4) hue-rotate(260deg) contrast(1.08);
+          backdrop-filter: grayscale(1) sepia(1) saturate(3.4) hue-rotate(260deg) contrast(1.08);
+}
+/* dentro de la lente el relleno blanco desaparece para que se vea la imagen filtrada */
+body.fx-photo-duotone .cursor.is-photo .cursor__ball--big circle { fill: transparent; }

@@ -13,7 +13,8 @@
 
 <link rel="stylesheet" href="styles.css">
 </head>
-<body class="is-loading">
+<!-- fx-photo-duotone: duotono magenta sobre fotos de arte (removible: borrá esa clase) -->
+<body class="is-loading fx-photo-duotone">
 
 <!-- Sprite de íconos: una sola fuente de verdad, recoloreable vía currentColor -->
 <svg style="display:none" aria-hidden="true">
@@ -34,6 +35,16 @@
 </svg>
 
 <a class="skip-link" href="#main">Saltar al contenido</a>
+
+<!-- Cursor personalizado (circle-follow): se activa solo en desktop con mouse fino — ver initCursor() -->
+<div class="cursor" data-cursor aria-hidden="true">
+  <div class="cursor__ball cursor__ball--big">
+    <svg width="40" height="40"><circle cx="20" cy="20" r="20" stroke-width="0"/></svg>
+  </div>
+  <div class="cursor__ball cursor__ball--small">
+    <svg width="10" height="10"><circle cx="5" cy="5" r="5" stroke-width="0"/></svg>
+  </div>
+</div>
 
 <header class="site-header" data-header id="top">
   <div class="container site-header__inner">
@@ -436,14 +447,8 @@
         <div class="mostra__grid" id="mostra-galeria">
           <div class="mostra__col" data-reveal>
             <p class="text-body">El arte cobra un significado especial cuando encuentra un espacio donde puede ser visto, interpretado y apreciado por otras personas. Por eso, en nuestra comunidad, te ofrecemos la posibilidad de compartir tus obras y formar parte de un entorno pensado para artistas, estudiantes, aficionados y amantes del arte que buscan descubrir nuevas miradas e inspirarse mutuamente.</p>
-            <p class="text-body">Ya sea una pintura, ilustración, fotografía, obra digital, collage o cualquier otra expresión creativa, este espacio está diseñado para que puedas mostrar tu trabajo y conectarte con personas que comparten tu pasión. Cada obra cuenta una historia, transmite emociones y refleja una visión única del mundo; al compartirla, contribuís a enriquecer una comunidad construida a partir de la diversidad de estilos, técnicas e ideas.</p>
-            <p class="text-body">Publicar tu arte es simple. Solo tenés que subir tu obra, agregar una breve descripción y compartir aquello que te inspiró durante el proceso creativo. De esta manera, otros usuarios podrán conocer más sobre tu trabajo, interactuar con tus publicaciones y descubrir el recorrido detrás de cada creación.</p>
-          </div>
-
-          <div class="mostra__col" data-reveal>
-            <p class="text-body">Creemos que el arte es una herramienta de expresión, aprendizaje y encuentro. Por eso, fomentamos un espacio respetuoso donde cada artista pueda desarrollarse, recibir reconocimiento por su trabajo y encontrar inspiración en las producciones de otros miembros de la comunidad.</p>
             <p class="text-body">Cada obra tiene una historia única detrás de su creación. Por eso, además de compartir tus trabajos, podés contar qué te inspiró, cómo fue tu proceso creativo o qué significado tiene la pieza para vos. Estas historias enriquecen la experiencia de la comunidad, permiten conocer mejor a cada artista y generan conexiones más profundas entre quienes crean y quienes observan.</p>
-            <p class="text-body">Animate a compartir tu creatividad, descubrir nuevas perspectivas y ser parte de una red de artistas que crece todos los días. Tu próxima obra puede inspirar a alguien más.</p>
+            <p class="text-body">Tu próxima obra puede inspirar a alguien más.</p>
           </div>
         </div>
 
@@ -469,6 +474,7 @@
             <p class="text-body">Trabajo con tierra y pigmentos que recojo en los viajes a la casa de mis abuelos. Las raíces no se ven, pero sostienen todo lo que sí vemos: quise fijar ese vínculo con la tierra de donde venimos.</p>
           </li>
         </ul>
+        <div class="mostra__obras-dots" data-obras-dots aria-label="Navegación de obras del mes"></div>
       </div>
     </div>
 
