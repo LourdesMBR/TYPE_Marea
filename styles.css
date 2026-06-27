@@ -725,65 +725,67 @@ body:not(.is-loading) .hero__title-line--bold .word {
   .quotes__arrow { width: 44px; height: 44px; }
 }
 
-/* ---------- 10. 03 MOSTRÁ ---------- */
-.mostra { background: var(--color-white); padding-block: var(--section-padding-y); }
+/* ---------- 10. 03 MOSTRÁ — experiencia horizontal (mismo mecanismo que Mirá) ---------- */
+.mostra { position: relative; background: var(--color-white); }
 
-/* Texto a la izquierda, obras del mes a la derecha (no apiladas).
-   La columna de obras es más ancha que el texto para que entren dos cards a la vez. */
-.mostra__split { display: flex; gap: var(--space-8); align-items: flex-start; }
-.mostra__main { flex: 1 1 42%; min-width: 0; }
+.mostra-hscroll { position: relative; }
+.mostra-hscroll__viewport { width: 100%; }
+.mostra-hscroll__track {
+  display: flex; overflow-x: auto; scroll-snap-type: x mandatory;
+  scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch;
+}
+.mostra-hscroll__track::-webkit-scrollbar { display: none; }
 
-.mostra__head { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--space-5); flex-wrap: wrap; }
+.mostra-panel {
+  position: relative; flex-shrink: 0; width: 100vw; min-height: 78vh; scroll-snap-align: start;
+  display: flex; flex-direction: column; justify-content: center;
+  padding-block: clamp(6rem, 5rem + 3vw, 7.5rem) var(--section-padding-y);
+  overflow: hidden;
+}
+
 .mostra__head .text-h1 { margin-block: var(--space-3) 0; }
 .mostra__subtitle { margin-block: var(--space-7) var(--space-8); max-width: 30ch; }
-
-/* una sola columna de texto */
-.mostra__grid { display: grid; grid-template-columns: 1fr; gap: var(--space-6); align-items: start; }
+.mostra__grid { display: grid; grid-template-columns: 1fr; gap: var(--space-6); align-items: start; max-width: 56ch; }
 .mostra__col .text-body + .text-body { margin-top: var(--space-5); }
+.mostra__pullquote { max-width: 56ch; margin-top: var(--space-8); }
 
-/* Obras del mes: deck horizontal con scroll, mismo patrón que el de Creá */
-.mostra__obras { flex: 1 1 56%; min-width: 0; }
-.mostra__obras-eyebrow { color: var(--color-magenta); margin-bottom: var(--space-5); }
-.mostra__obras-deck {
-  display: flex; gap: var(--space-6);
-  overflow-x: auto; scroll-snap-type: x mandatory;
-  padding: var(--space-8) var(--container-padding-x) var(--space-2) 0;
-  scrollbar-width: none; cursor: grab;
+/* paneles de obra: imagen/bloque de color a un lado, texto al otro — alternan con
+   --reverse para que la galería no se sienta como una fila repetida de lo mismo */
+.mostra-panel--obra {
+  flex-direction: row; align-items: center; gap: var(--space-9);
+  padding-inline: var(--container-padding-x);
 }
-.mostra__obras-deck::-webkit-scrollbar { display: none; }
-.mostra__obras-deck.is-dragging { scroll-snap-type: none; cursor: grabbing; }
+.mostra-panel--reverse { flex-direction: row-reverse; }
 
-.mostra__obra-card {
-  flex: 0 0 auto; scroll-snap-align: start; width: min(64vw, 300px);
-  border: 1px solid rgba(0,0,0,0.12); border-radius: var(--radius-md); padding: var(--space-5);
+.mostra-panel__media { flex: 0 0 46%; }
+.mostra-panel__media img,
+.mostra-panel__media .mostra__obra-card-cover {
+  width: 100%; aspect-ratio: 4/5; object-fit: cover;
 }
-.mostra__obra-card img,
-.mostra__obra-card-cover {
-  width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: var(--radius-sm); margin-bottom: var(--space-4);
-  transition: transform var(--dur-base) var(--ease-out); will-change: transform;
-}
-.mostra__obra-card-cover {
+.mostra-panel__media .mostra__obra-card-cover {
   display: flex; align-items: center; justify-content: center; padding: var(--space-5); text-align: center;
   font-family: var(--font-display); font-weight: 700; font-size: var(--fs-h3); color: var(--color-black);
 }
-.mostra__obra-card--lime .mostra__obra-card-cover { background: var(--color-lime); }
-.mostra__obra-card--magenta .mostra__obra-card-cover { background: var(--color-magenta); color: var(--color-white); }
+.mostra__obra-card--lime { background: var(--color-lime); color: var(--color-black); }
+.mostra__obra-card--magenta { background: var(--color-magenta); color: var(--color-white); }
+.mostra__obra-card--turquoise { background: var(--color-turquoise); color: var(--color-black); }
+.mostra__obra-card--black { background: var(--color-black); color: var(--color-white); }
+.mostra__obra-card--white { background: var(--color-white); color: var(--color-black); border: 1px solid rgba(0,0,0,0.15); }
 
-.mostra__obra-title { font-family: var(--font-display); font-weight: 700; margin-bottom: var(--space-3); }
-.mostra__obra-title em { display: block; font-family: var(--font-body); font-weight: 400; font-style: italic; opacity: 0.7; font-size: var(--fs-caption); margin-top: 2px; }
-.mostra__obra-card .text-body { font-size: 0.88rem; }
+.mostra-panel__info { flex: 1 1 auto; max-width: 36ch; }
+/* jerarquía: título a escala de subtítulo, autor chico, cuerpo normal */
+.mostra__obra-title { font-family: var(--font-display); font-size: var(--fs-subtitle); font-weight: 600; line-height: var(--lh-base); }
+.mostra__obra-author { font-size: var(--fs-caption); opacity: 0.7; font-style: italic; margin-block: 2px var(--space-3); }
+.mostra-panel__info .text-body { font-size: 0.95rem; }
 
-/* dots: indican y navegan las cards del deck */
-.mostra__obras-dots { display: flex; gap: var(--space-2); margin-top: var(--space-5); }
-.mostra__obras-dots__dot {
-  width: 9px; height: 9px; border-radius: 50%; padding: 0;
-  background: rgba(0,0,0,0.18); cursor: pointer;
-  transition: background var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
+/* barra superior fija: "Obras del mes" a la izquierda, CTA al extremo derecho */
+.mostra-bar {
+  position: absolute; top: 0; left: 0; right: 0; z-index: var(--z-hscroll-nav);
+  display: flex; justify-content: space-between; align-items: center; gap: var(--space-5);
+  padding: var(--space-5) var(--container-padding-x);
 }
-.mostra__obras-dots__dot:hover { background: rgba(0,0,0,0.4); }
-.mostra__obras-dots__dot.is-active { background: var(--color-magenta); transform: scale(1.25); }
-
-.mostra__pullquote { text-align: center; max-width: 720px; margin: var(--space-9) auto; }
+.mostra-bar__eyebrow { color: var(--color-magenta); }
+.mostra-bar .link-cta { font-size: var(--fs-caption); }
 
 .mostra__cta-band { background: var(--color-black); color: var(--color-white); padding-block: var(--space-9); text-align: center; }
 .mostra__cta-band .text-h2 { max-width: 20ch; margin-inline: auto; margin-bottom: var(--space-9); }
@@ -796,12 +798,21 @@ body:not(.is-loading) .hero__title-line--bold .word {
 .mostra__cta-frame-img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
 .mostra__cta-frame .btn { position: relative; z-index: 1; }
 
+@media (min-width: 1024px) {
+  /* la altura real (N paneles × 100vh) la fija JS según la cantidad de paneles */
+  .mostra-hscroll[data-hscroll-mode="hijack"] .mostra-hscroll__viewport { position: sticky; top: 0; height: 100vh; overflow: hidden; }
+  .mostra-hscroll[data-hscroll-mode="hijack"] .mostra-hscroll__track { height: 100%; overflow: hidden; scroll-snap-type: none; }
+  .mostra-hscroll[data-hscroll-mode="hijack"] .mostra-panel { height: 100%; }
+}
+
 @media (max-width: 1023px) {
-  /* a este ancho no entran lado a lado: las obras bajan debajo del texto */
-  .mostra__split { flex-direction: column; }
-  .mostra__main, .mostra__obras { flex-basis: auto; width: 100%; }
-  .mostra__obras { margin-top: var(--space-8); }
-  .mostra__grid { grid-template-columns: 1fr; }
+  .mostra-panel { width: 92vw; margin-right: 4vw; height: 78vh; min-height: 560px; overflow-y: auto; }
+  .mostra-panel--obra, .mostra-panel--reverse { flex-direction: column; align-items: stretch; padding-inline: var(--container-padding-x); gap: var(--space-6); }
+  .mostra-panel__media { flex: 0 0 auto; }
+  .mostra-panel__info { max-width: none; }
+  .mostra-hscroll__track { padding-bottom: var(--space-4); }
+  .mostra-bar { padding: var(--space-4) var(--container-padding-x); }
+  .mostra__grid, .mostra__pullquote { max-width: none; }
   .mostra__cta-frame { width: clamp(280px, 84vw, 560px); }
 }
 

@@ -1,7 +1,7 @@
 /* =========================================================
    MAREA — landing
    Módulos: capabilities · header · reveal · mira (hscroll+parallax)
-            · crea (deck drag) · quotes · mostra (tilt + obras) · newsletter
+            · crea (deck drag) · quotes · mostra (hscroll: texto + 6 obras) · newsletter
             · cursor (circle-follow nativo)
    (aprendé: hover/focus-within puro en CSS, sin JS)
    ========================================================= */
@@ -35,14 +35,14 @@
     initMira();
     initCrea();
     initQuotes();
-    initMostraTilt();
-    initMostraObras();
+    initMostraHscroll();
     initNewsletter();
     initCursor();
 
     window.addEventListener("resize", debounce(() => {
       readCaps();
       refreshMira();
+      refreshMostra();
       cursor?.refresh();
     }, 200));
   });
@@ -351,76 +351,65 @@
     render();
   }
 
-  /* ---------- 03 Mostrá: tilt sutil ---------- */
-  function initMostraTilt() {
-    document.querySelectorAll("[data-tilt]").forEach((wrap) => {
-      const img = wrap.querySelector("img");
-      if (!img) return;
+  /* ---------- 03 Mostrá: hijack horizontal (mismo mecanismo que Mirá) ----------
+     Toda la sección (texto + 6 obras, 7 paneles) se mueve como una sola unidad
+     al scrollear, no solo la galería. En touch/mobile cae a scroll nativo. */
+  let mostra = null;
 
-      wrap.addEventListener("pointermove", (e) => {
-        if (!caps.hoverFine) return;
-        const rect = img.getBoundingClientRect();
-        const px = (e.clientX - rect.left) / rect.width - 0.5;
-        const py = (e.clientY - rect.top) / rect.height - 0.5;
-        img.style.transition = "none";
-        img.style.transform = `rotateX(${(-py * 8).toFixed(2)}deg) rotateY(${(px * 8).toFixed(2)}deg) scale(1.03)`;
-      });
-      wrap.addEventListener("pointerleave", () => {
-        img.style.transition = "transform 500ms var(--ease-out)";
-        img.style.transform = "rotateX(0) rotateY(0) scale(1)";
-      });
+  function initMostraHscroll() {
+    const hscroll = document.querySelector("[data-mostra-hscroll]");
+    const track = document.querySelector("[data-mostra-track]");
+    if (!hscroll || !track) return;
+    const panels = Array.from(track.querySelectorAll("[data-mpanel]"));
+
+    mostra = { hscroll, track, panels, start: 0, total: 0 };
+
+    document.querySelectorAll("[data-mostra-goto]").forEach((btn) => {
+      btn.addEventListener("click", () => goToMostraPanel(btn.dataset.mostraGoto));
     });
+
+    window.addEventListener("scroll", onMostraScroll, { passive: true });
+    track.addEventListener("scroll", onMostraTrackScroll, { passive: true });
+    refreshMostra();
   }
 
-  /* ---------- Obras del mes: deck horizontal, arrastre con mouse + dots ---------- */
-  function initMostraObras() {
-    const list = document.querySelector(".mostra__obras-deck");
-    if (!list) return;
-    const cards = Array.from(list.querySelectorAll(".mostra__obra-card"));
-    const dotsWrap = document.querySelector("[data-obras-dots]");
-    let drag = null;
-
-    // dots: uno por card, click para deslizar, activo según posición de scroll
-    let dots = [];
-    if (dotsWrap && cards.length > 1) {
-      dots = cards.map((card, i) => {
-        const dot = document.createElement("button");
-        dot.type = "button";
-        dot.className = "mostra__obras-dots__dot";
-        dot.setAttribute("aria-label", `Ir a la obra ${i + 1}`);
-        dot.addEventListener("click", () => {
-          list.scrollTo({ left: card.offsetLeft - list.offsetLeft, behavior: "smooth" });
-        });
-        dotsWrap.appendChild(dot);
-        return dot;
-      });
+  function refreshMostra() {
+    if (!mostra) return;
+    const wasHijack = mostra.hscroll.dataset.hscrollMode === "hijack";
+    if (caps.hijack) {
+      mostra.hscroll.dataset.hscrollMode = "hijack";
+      mostra.hscroll.style.height = `${mostra.panels.length * 100}vh`;
+      const rect = mostra.hscroll.getBoundingClientRect();
+      mostra.start = window.scrollY + rect.top;
+      mostra.total = mostra.hscroll.offsetHeight - window.innerHeight;
+      if (!wasHijack) mostra.track.scrollLeft = 0;
+    } else {
+      delete mostra.hscroll.dataset.hscrollMode;
+      mostra.hscroll.style.height = "";
+      mostra.track.scrollLeft = 0;
     }
+  }
 
-    const step = () => (cards[1]?.offsetLeft ?? 0) - (cards[0]?.offsetLeft ?? 0) || 1;
-    function syncDots() {
-      if (!dots.length) return;
-      const maxScroll = list.scrollWidth - list.clientWidth;
-      const active = list.scrollLeft >= maxScroll - 1
-        ? cards.length - 1
-        : clamp(Math.round(list.scrollLeft / step()), 0, cards.length - 1);
-      dots.forEach((d, i) => d.classList.toggle("is-active", i === active));
+  function onMostraScroll() {
+    if (!mostra || mostra.hscroll.dataset.hscrollMode !== "hijack") return;
+    const progress = clamp((window.scrollY - mostra.start) / mostra.total, 0, 1);
+    mostra.track.scrollLeft = progress * (mostra.track.scrollWidth - mostra.track.clientWidth);
+  }
+
+  function onMostraTrackScroll() {
+    // en modo nativo (touch/mobile) el track ya scrollea solo; no hay progreso que sincronizar
+  }
+
+  function goToMostraPanel(target) {
+    if (!mostra) return;
+    const idx = mostra.panels.findIndex((p) => p.dataset.mpanel === target);
+    if (idx === -1) return;
+    if (mostra.hscroll.dataset.hscrollMode === "hijack") {
+      const ratio = idx / (mostra.panels.length - 1);
+      window.scrollTo({ top: mostra.start + ratio * mostra.total, behavior: caps.reducedMotion ? "auto" : "smooth" });
+    } else {
+      mostra.panels[idx].scrollIntoView({ behavior: caps.reducedMotion ? "auto" : "smooth", inline: "start", block: "nearest" });
     }
-    list.addEventListener("scroll", syncDots, { passive: true });
-    syncDots();
-
-    list.addEventListener("pointerdown", (e) => {
-      if (e.pointerType !== "mouse") return;
-      drag = { startX: e.clientX, startScroll: list.scrollLeft };
-      list.classList.add("is-dragging");
-      list.setPointerCapture(e.pointerId);
-    });
-    list.addEventListener("pointermove", (e) => {
-      if (!drag) return;
-      list.scrollLeft = drag.startScroll - (e.clientX - drag.startX);
-    });
-    const stopDrag = () => { drag = null; list.classList.remove("is-dragging"); };
-    list.addEventListener("pointerup", stopDrag);
-    list.addEventListener("pointercancel", stopDrag);
   }
 
   /* ---------- Cursor personalizado: circle-follow nativo (sin GSAP) ---------- */

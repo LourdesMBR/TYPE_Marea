@@ -429,49 +429,106 @@
 
   <!-- 03. MOSTRÁ -->
   <section class="mostra" id="mostra" aria-label="03. Mostrá">
-    <div class="container mostra__split">
-      <div class="mostra__main">
-        <div class="mostra__head" data-reveal>
-          <div>
-            <p class="eyebrow">03.</p>
-            <h2 class="text-h1">Mostrá</h2>
-          </div>
-          <a class="link-cta mostra__head-cta" href="#mostra-galeria">Deslizá y conocé más<svg aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+    <!-- Experiencia horizontal: 7 paneles (intro + 6 obras), hijack de scroll en desktop /
+         scroll nativo en touch — mismo mecanismo que la experiencia de Mirá. -->
+    <div class="mostra-hscroll" data-mostra-hscroll>
+      <div class="mostra-hscroll__viewport">
+
+        <div class="mostra-bar" data-mostra-bar>
+          <p class="eyebrow mostra-bar__eyebrow">Obras del mes</p>
+          <button type="button" class="link-cta" data-mostra-goto="obra-1">Deslizá y conocé más<svg aria-hidden="true"><use href="#icon-arrow"/></svg></button>
         </div>
 
-        <p class="text-subtitle mostra__subtitle" data-reveal>Las obras inspiran.<br>Las historias las hacen inolvidables.</p>
+        <div class="mostra-hscroll__track" data-mostra-track>
 
-        <div class="mostra__grid" id="mostra-galeria">
-          <div class="mostra__col" data-reveal>
-            <p class="text-body">El arte cobra un significado especial cuando encuentra un espacio donde puede ser visto, interpretado y apreciado por otras personas. Por eso, en nuestra comunidad, te ofrecemos la posibilidad de compartir tus obras y formar parte de un entorno pensado para artistas, estudiantes, aficionados y amantes del arte que buscan descubrir nuevas miradas e inspirarse mutuamente.</p>
-            <p class="text-body">Cada obra tiene una historia única detrás de su creación. Por eso, además de compartir tus trabajos, podés contar qué te inspiró, cómo fue tu proceso creativo o qué significado tiene la pieza para vos. Estas historias enriquecen la experiencia de la comunidad, permiten conocer mejor a cada artista y generan conexiones más profundas entre quienes crean y quienes observan.</p>
-            <p class="text-body">Tu próxima obra puede inspirar a alguien más.</p>
-          </div>
+          <article class="mostra-panel mostra-panel--intro" data-mpanel="intro">
+            <div class="container">
+              <div class="mostra__head" data-reveal>
+                <p class="eyebrow">03.</p>
+                <h2 class="text-h1">Mostrá</h2>
+              </div>
+
+              <p class="text-subtitle mostra__subtitle" data-reveal>Las obras inspiran.<br>Las historias las hacen inolvidables.</p>
+
+              <div class="mostra__grid">
+                <div class="mostra__col" data-reveal>
+                  <p class="text-body">El arte cobra un significado especial cuando encuentra un espacio donde puede ser visto, interpretado y apreciado por otras personas. Por eso, en nuestra comunidad, te ofrecemos la posibilidad de compartir tus obras y formar parte de un entorno pensado para artistas, estudiantes, aficionados y amantes del arte que buscan descubrir nuevas miradas e inspirarse mutuamente.</p>
+                  <p class="text-body">Cada obra tiene una historia única detrás de su creación. Por eso, además de compartir tus trabajos, podés contar qué te inspiró, cómo fue tu proceso creativo o qué significado tiene la pieza para vos. Estas historias enriquecen la experiencia de la comunidad, permiten conocer mejor a cada artista y generan conexiones más profundas entre quienes crean y quienes observan.</p>
+                  <p class="text-body">Tu próxima obra puede inspirar a alguien más.</p>
+                </div>
+              </div>
+
+              <p class="text-destacado mostra__pullquote" data-reveal>Detrás de cada obra hay una historia que merece ser contada.</p>
+            </div>
+          </article>
+
+          <article class="mostra-panel mostra-panel--obra" data-mpanel="obra-1" id="mostra-galeria">
+            <div class="mostra-panel__media">
+              <img src="img/obras/gomez-ultima-luz.jpg" alt="«Última luz», obra de Ulises Gómez" loading="lazy">
+            </div>
+            <div class="mostra-panel__info">
+              <p class="mostra__obra-title">«Última luz»</p>
+              <p class="mostra__obra-author">Ulises Gómez</p>
+              <p class="text-body">Pinté esta obra al volver a mi pueblo natal tras años en la ciudad. Quise capturar ese instante en el que el viento se detiene y el tiempo transcurre distinto: un homenaje a los paisajes que siguen haciéndonos sentir en casa.</p>
+            </div>
+          </article>
+
+          <article class="mostra-panel mostra-panel--obra mostra-panel--reverse" data-mpanel="obra-2">
+            <div class="mostra-panel__info">
+              <p class="mostra__obra-title">«Eco de barrio»</p>
+              <p class="mostra__obra-author">Valentina Ríos</p>
+              <p class="text-body">Esta serie nace de caminar el mismo barrio durante un año, fotografiando paredes que cambian de mano en mano. Cada mural tapa al anterior, pero nunca del todo: siempre queda un borde, un color que se asoma.</p>
+            </div>
+            <div class="mostra-panel__media">
+              <div class="mostra__obra-card-cover mostra__obra-card--lime" aria-hidden="true"><span>Eco de barrio</span></div>
+            </div>
+          </article>
+
+          <article class="mostra-panel mostra-panel--obra" data-mpanel="obra-3">
+            <div class="mostra-panel__media">
+              <div class="mostra__obra-card-cover mostra__obra-card--magenta" aria-hidden="true"><span>Raíces</span></div>
+            </div>
+            <div class="mostra-panel__info">
+              <p class="mostra__obra-title">«Raíces»</p>
+              <p class="mostra__obra-author">Tomás Aldao</p>
+              <p class="text-body">Trabajo con tierra y pigmentos que recojo en los viajes a la casa de mis abuelos. Las raíces no se ven, pero sostienen todo lo que sí vemos: quise fijar ese vínculo con la tierra de donde venimos.</p>
+            </div>
+          </article>
+
+          <article class="mostra-panel mostra-panel--obra mostra-panel--reverse" data-mpanel="obra-4">
+            <div class="mostra-panel__info">
+              <p class="mostra__obra-title">«Marea baja»</p>
+              <p class="mostra__obra-author">Lucía Ferraro</p>
+              <p class="text-body">Fotografié la misma costa durante un año, siempre a la misma hora, en cada estación. El mar nunca vuelve exactamente al mismo lugar, pero siempre deja una marca parecida: quise registrar esa repetición que nunca es idéntica.</p>
+            </div>
+            <div class="mostra-panel__media">
+              <div class="mostra__obra-card-cover mostra__obra-card--turquoise" aria-hidden="true"><span>Marea baja</span></div>
+            </div>
+          </article>
+
+          <article class="mostra-panel mostra-panel--obra" data-mpanel="obra-5">
+            <div class="mostra-panel__media">
+              <div class="mostra__obra-card-cover mostra__obra-card--black" aria-hidden="true"><span>Sin título #7</span></div>
+            </div>
+            <div class="mostra-panel__info">
+              <p class="mostra__obra-title">«Sin título #7»</p>
+              <p class="mostra__obra-author">Martín Suárez</p>
+              <p class="text-body">Trabajo en series numeradas porque cada pieza es una variación de la misma pregunta. Esta surgió de simplificar hasta el límite: quería ver cuánto se podía sacar de una imagen antes de que dejara de comunicar algo.</p>
+            </div>
+          </article>
+
+          <article class="mostra-panel mostra-panel--obra mostra-panel--reverse" data-mpanel="obra-6">
+            <div class="mostra-panel__info">
+              <p class="mostra__obra-title">«Hilo conductor»</p>
+              <p class="mostra__obra-author">Nadia Campos</p>
+              <p class="text-body">Bordo sobre tela vieja de mi familia, hilos que ya estaban gastados antes de que yo empezara. Cada puntada es una forma de seguir una conversación que arrancó mucho antes que yo y que todavía no termina.</p>
+            </div>
+            <div class="mostra-panel__media">
+              <div class="mostra__obra-card-cover mostra__obra-card--white" aria-hidden="true"><span>Hilo conductor</span></div>
+            </div>
+          </article>
+
         </div>
-
-        <p class="text-destacado mostra__pullquote" data-reveal>Detrás de cada obra hay una historia que merece ser contada.</p>
-      </div>
-
-      <div class="mostra__obras" data-reveal>
-        <p class="eyebrow mostra__obras-eyebrow">Obras del mes</p>
-        <ul class="mostra__obras-deck">
-          <li class="mostra__obra-card" data-tilt>
-            <img src="img/obras/gomez-ultima-luz.jpg" alt="«Última luz», obra de Ulises Gómez" loading="lazy">
-            <p class="mostra__obra-title">«Última luz»<em>Ulises Gómez</em></p>
-            <p class="text-body">Pinté esta obra al volver a mi pueblo natal tras años en la ciudad. Quise capturar ese instante en el que el viento se detiene y el tiempo transcurre distinto: un homenaje a los paisajes que siguen haciéndonos sentir en casa.</p>
-          </li>
-          <li class="mostra__obra-card mostra__obra-card--lime">
-            <div class="mostra__obra-card-cover" aria-hidden="true"><span>Eco de barrio</span></div>
-            <p class="mostra__obra-title">«Eco de barrio»<em>Valentina Ríos</em></p>
-            <p class="text-body">Esta serie nace de caminar el mismo barrio durante un año, fotografiando paredes que cambian de mano en mano. Cada mural tapa al anterior, pero nunca del todo: siempre queda un borde, un color que se asoma.</p>
-          </li>
-          <li class="mostra__obra-card mostra__obra-card--magenta">
-            <div class="mostra__obra-card-cover" aria-hidden="true"><span>Raíces</span></div>
-            <p class="mostra__obra-title">«Raíces»<em>Tomás Aldao</em></p>
-            <p class="text-body">Trabajo con tierra y pigmentos que recojo en los viajes a la casa de mis abuelos. Las raíces no se ven, pero sostienen todo lo que sí vemos: quise fijar ese vínculo con la tierra de donde venimos.</p>
-          </li>
-        </ul>
-        <div class="mostra__obras-dots" data-obras-dots aria-label="Navegación de obras del mes"></div>
       </div>
     </div>
 
