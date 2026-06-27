@@ -447,7 +447,12 @@ body:not(.is-loading) .hero__title-line--bold .word {
 
 .mira-panel--barroco { flex-direction: row; padding: 0 !important; align-items: stretch; }
 .mira-panel__split-img { position: relative; flex: 0 0 56%; overflow: hidden; }
-.mira-panel__split-img img { position: absolute; inset: -6% -6%; width: 112%; height: 112%; object-fit: cover; }
+/* sangrado generoso (antes -6%, 54px de margen real): le da lugar al parallax para
+   moverse mucho más sin descubrir un borde vacío arriba/abajo de la imagen.
+   top/left + width/height explícitos (no el shorthand "inset" en los 4 lados): en un
+   <img> (elemento reemplazado), fijar inset completo sin width/height de alto
+   explícito cae al tamaño intrínseco y el alto calculado puede irse a 0. */
+.mira-panel__split-img img { position: absolute; top: -16%; left: -8%; width: 116%; max-width: none; height: 132%; object-fit: cover; }
 .mira-panel__split-text {
   flex: 1; display: flex; flex-direction: column; justify-content: center;
   background: var(--color-black); padding: var(--section-padding-y) clamp(2.5rem, 1.5rem + 4vw, 6rem);

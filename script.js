@@ -211,7 +211,7 @@
       const barrocoIdx = mira.panels.findIndex((p) => p.dataset.panel === "barroco");
       const step = 1 / (mira.panels.length - 1);
       const local = clamp((progress - (barrocoIdx - 0.5) * step) / step, 0, 1);
-      mira.barrocoImg.style.transform = `translateY(${(local - 0.5) * 90}px)`;
+      mira.barrocoImg.style.transform = `translateY(${(local - 0.5) * 220}px)`;
     }
   }
 
@@ -445,8 +445,9 @@
     }
     return null;
   }
+  // tinte de color de marca (turquesa/lima/magenta). Las fotos NO pasan por acá:
+  // tienen su propio tratamiento de lente (ver isPhotoTarget + clase is-photo).
   function cursorTintFor(el) {
-    if (el.closest?.("img, picture")) return "#FFFFFF"; // sobre fotos: sólido, no invierte
     const c = cursorBgColor(el);
     if (!c) return null;
     for (const t of CURSOR_TINTS) {
@@ -454,18 +455,19 @@
     }
     return null;
   }
+  function isPhotoTarget(el) {
+    return !!el?.closest?.("img, picture");
+  }
 
   function initCursor() {
     const root = document.querySelector("[data-cursor]");
     if (!root) return;
     const big = root.querySelector(".cursor__ball--big");
-    const small = root.querySelector(".cursor__ball--small");
 
     const s = {
       on: false, raf: null, visible: false,
       tx: innerWidth / 2, ty: innerHeight / 2,
       bx: innerWidth / 2, by: innerHeight / 2,
-      sx: innerWidth / 2, sy: innerHeight / 2,
     };
 
     function onMove(e) {
@@ -473,29 +475,35 @@
       if (!s.visible) { s.visible = true; root.classList.add("is-visible"); }
     }
     function applyTint(el) {
+      if (isPhotoTarget(el)) {
+        // lente: backdrop-filter en el propio círculo, solo tiñe lo que tiene detrás
+        root.classList.add("is-photo");
+        root.classList.remove("is-solid");
+        root.style.removeProperty("--cursor-fill");
+        return;
+      }
+      root.classList.remove("is-photo");
       const fill = el && cursorTintFor(el);
       if (fill) { root.style.setProperty("--cursor-fill", fill); root.classList.add("is-solid"); }
       else { root.style.removeProperty("--cursor-fill"); root.classList.remove("is-solid"); }
     }
     function onLeave() {
       s.visible = false;
-      root.classList.remove("is-visible", "is-solid");
+      root.classList.remove("is-visible", "is-solid", "is-photo");
       root.style.removeProperty("--cursor-fill");
     }
     function onOver(e) {
       if (e.target.closest?.(CURSOR_TARGETS)) root.classList.add("is-hovering");
-      applyTint(e.target); // recomputa el tinte al entrar a cada elemento
+      applyTint(e.target); // recomputa el tinte/lente al entrar a cada elemento
     }
     function onOut(e) {
       if (!e.relatedTarget?.closest?.(CURSOR_TARGETS)) root.classList.remove("is-hovering");
     }
 
-    // loop: la grande sigue con retardo (lerp 0.18), la chica de cerca (lerp 0.45)
+    // loop: la bola sigue al mouse con un leve retardo (lerp)
     function tick() {
       s.bx += (s.tx - s.bx) * 0.18; s.by += (s.ty - s.by) * 0.18;
-      s.sx += (s.tx - s.sx) * 0.45; s.sy += (s.ty - s.sy) * 0.45;
       big.style.transform = `translate3d(${(s.bx - 20).toFixed(2)}px, ${(s.by - 20).toFixed(2)}px, 0)`;
-      small.style.transform = `translate3d(${(s.sx - 5).toFixed(2)}px, ${(s.sy - 5).toFixed(2)}px, 0)`;
       s.raf = requestAnimationFrame(tick);
     }
 
@@ -513,7 +521,7 @@
       if (!s.on) return;
       s.on = false;
       document.body.classList.remove("is-cursor-custom");
-      root.classList.remove("is-visible", "is-hovering", "is-solid");
+      root.classList.remove("is-visible", "is-hovering", "is-solid", "is-photo");
       root.style.removeProperty("--cursor-fill");
       window.removeEventListener("mousemove", onMove);
       document.removeEventListener("mouseleave", onLeave);
