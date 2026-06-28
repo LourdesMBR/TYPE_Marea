@@ -14,7 +14,11 @@
   function readCaps() {
     caps.reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
     caps.hoverFine = matchMedia("(hover: hover) and (pointer: fine)").matches;
-    caps.hijack = caps.hoverFine && matchMedia("(min-width: 1024px)").matches && !caps.reducedMotion;
+    // hijack en todos los dispositivos (desktop + touch/mobile): el scroll
+    // vertical mueve los paneles horizontalmente. Solo se desactiva con
+    // reduced-motion (cae a scroll horizontal nativo). hoverFine queda separado
+    // y gobierna SOLO el cursor custom (sigue apagado en mobile).
+    caps.hijack = !caps.reducedMotion;
   }
   readCaps();
 
@@ -115,13 +119,17 @@
     const hscroll = document.querySelector("[data-hscroll]");
     const track = document.querySelector("[data-hscroll-track]");
     if (!hscroll || !track) return;
-    const panels = Array.from(track.querySelectorAll("[data-panel]"));
+    // allPanels = todos los [data-panel] del DOM; panels = solo los visibles (algunos
+    // existen solo en una resolución, p.ej. el slide "Arte, ciencia..." solo-mobile).
+    // panels se recalcula en refreshMira según display, para que el conteo del hijack
+    // (alto = N×100vh) coincida con los paneles realmente renderizados.
+    const allPanels = Array.from(track.querySelectorAll("[data-panel]"));
     const bar = document.querySelector("[data-hscroll-nav]");
     const indexEl = document.querySelector("[data-hscroll-index]");
     const eraTabs = Array.from(document.querySelectorAll(".mira-bar__tab"));
     const barrocoImg = document.querySelector("[data-parallax]");
 
-    mira = { hscroll, track, panels, bar, indexEl, eraTabs, barrocoImg, start: 0, total: 0 };
+    mira = { hscroll, track, allPanels, panels: allPanels, bar, indexEl, eraTabs, barrocoImg, start: 0, total: 0 };
 
     document.querySelectorAll("[data-hscroll-nav] [data-target]").forEach((btn) => {
       btn.addEventListener("click", () => { goToPanel(btn.dataset.target); closeEraTabs(); });
@@ -146,6 +154,16 @@
     });
     document.addEventListener("click", closeEraTabs);
 
+    // flip de las cards del intro: en desktop es por hover (CSS); en touch (sin
+    // hover) lo hacemos por tap, togglear .is-flipped. Solo cuando NO hay hover
+    // fino, para no interferir con el hover del desktop.
+    if (!caps.hoverFine) {
+      track.querySelectorAll(".mira-intro__card-inner").forEach((inner) => {
+        const card = inner.closest(".mira-intro__card");
+        card.addEventListener("click", () => card.classList.toggle("is-flipped"));
+      });
+    }
+
     window.addEventListener("scroll", onMiraScroll, { passive: true });
     track.addEventListener("scroll", onTrackScroll, { passive: true });
     refreshMira();
@@ -161,6 +179,8 @@
 
   function refreshMira() {
     if (!mira) return;
+    // recalcular paneles visibles (los solo-mobile/solo-desktop entran/salen según display)
+    mira.panels = mira.allPanels.filter((p) => getComputedStyle(p).display !== "none");
     const wasHijack = mira.hscroll.dataset.hscrollMode === "hijack";
     if (caps.hijack) {
       mira.hscroll.dataset.hscrollMode = "hijack";
@@ -361,8 +381,11 @@
     const track = document.querySelector("[data-mostra-track]");
     if (!hscroll || !track) return;
     const panels = Array.from(track.querySelectorAll("[data-mpanel]"));
+    // una imagen (o bloque de color) de parallax por panel; los paneles sin
+    // .mostra-panel__media (el de texto) quedan en null y se ignoran
+    const media = panels.map((p) => p.querySelector(".mostra-panel__media img, .mostra-panel__media .mostra__obra-card-cover"));
 
-    mostra = { hscroll, track, panels, start: 0, total: 0 };
+    mostra = { hscroll, track, panels, media, start: 0, total: 0 };
 
     document.querySelectorAll("[data-mostra-goto]").forEach((btn) => {
       btn.addEventListener("click", () => goToMostraPanel(btn.dataset.mostraGoto));
@@ -383,10 +406,12 @@
       mostra.start = window.scrollY + rect.top;
       mostra.total = mostra.hscroll.offsetHeight - window.innerHeight;
       if (!wasHijack) mostra.track.scrollLeft = 0;
+      updateMostraParallax(0);
     } else {
       delete mostra.hscroll.dataset.hscrollMode;
       mostra.hscroll.style.height = "";
       mostra.track.scrollLeft = 0;
+      updateMostraParallax(0);
     }
   }
 
@@ -394,10 +419,28 @@
     if (!mostra || mostra.hscroll.dataset.hscrollMode !== "hijack") return;
     const progress = clamp((window.scrollY - mostra.start) / mostra.total, 0, 1);
     mostra.track.scrollLeft = progress * (mostra.track.scrollWidth - mostra.track.clientWidth);
+    updateMostraParallax(progress);
   }
 
   function onMostraTrackScroll() {
-    // en modo nativo (touch/mobile) el track ya scrollea solo; no hay progreso que sincronizar
+    if (!mostra || mostra.hscroll.dataset.hscrollMode === "hijack") return;
+    const maxScroll = mostra.track.scrollWidth - mostra.track.clientWidth;
+    const progress = maxScroll > 0 ? mostra.track.scrollLeft / maxScroll : 0;
+    updateMostraParallax(progress);
+  }
+
+  // parallax vertical: cada imagen se desplaza dentro de su propia "ventana" de
+  // scroll (medio paso antes/después de que su panel quede centrado), igual que
+  // el parallax del panel Barroco en Mirá, pero generalizado a los 6 paneles.
+  function updateMostraParallax(progress) {
+    if (!mostra) return;
+    const n = mostra.panels.length;
+    const step = 1 / (n - 1);
+    mostra.media.forEach((el, i) => {
+      if (!el) return;
+      const local = clamp((progress - (i - 0.5) * step) / step, 0, 1);
+      el.style.transform = `translateY(${(local - 0.5) * 70}px)`;
+    });
   }
 
   function goToMostraPanel(target) {
@@ -415,35 +458,9 @@
   /* ---------- Cursor personalizado: circle-follow nativo (sin GSAP) ---------- */
   let cursor = null;
   const CURSOR_TARGETS = "a, button, .cta, .btn";
-  // mapeo color de fondo real (rgb) -> color sólido que toma el cursor sobre él
-  const CURSOR_TINTS = [
-    { r: 0,   g: 255, b: 208, fill: "#F137A5" }, // turquesa (botón primario) -> magenta
-    { r: 206, g: 245, b: 100, fill: "#4100F5" }, // lima (banda/marquee)       -> azul
-    { r: 241, g: 55,  b: 166, fill: "#CEF564" }, // magenta (banda "Por año")  -> lima
-  ];
-
-  function cursorBgColor(el) {
-    let n = el;
-    while (n && n.nodeType === 1 && n !== document.documentElement) {
-      const m = getComputedStyle(n).backgroundColor.match(/rgba?\(([^)]+)\)/);
-      if (m) {
-        const p = m[1].split(",").map((v) => parseFloat(v));
-        if ((p[3] ?? 1) > 0) return { r: p[0], g: p[1], b: p[2] };
-      }
-      n = n.parentElement;
-    }
-    return null;
-  }
-  // tinte de color de marca (turquesa/lima/magenta). Las fotos NO pasan por acá:
-  // tienen su propio tratamiento de lente (ver isPhotoTarget + clase is-photo).
-  function cursorTintFor(el) {
-    const c = cursorBgColor(el);
-    if (!c) return null;
-    for (const t of CURSOR_TINTS) {
-      if (Math.abs(c.r - t.r) < 6 && Math.abs(c.g - t.g) < 6 && Math.abs(c.b - t.b) < 6) return t.fill;
-    }
-    return null;
-  }
+  // sobre fotos el cursor usa una lente duotono (no inversión); el resto del
+  // tiempo es un solo círculo blanco con mix-blend-mode:difference, que invierte
+  // el fondo (texto legible sobre cualquier superficie). Ver CSS .cursor__base.
   function isPhotoTarget(el) {
     return !!el?.closest?.("img, picture");
   }
@@ -451,48 +468,48 @@
   function initCursor() {
     const root = document.querySelector("[data-cursor]");
     if (!root) return;
-    const big = root.querySelector(".cursor__ball--big");
+    const ball = root.querySelector("[data-cursor-ball]");
 
     const s = {
       on: false, raf: null, visible: false,
       tx: innerWidth / 2, ty: innerHeight / 2,
       bx: innerWidth / 2, by: innerHeight / 2,
+      scale: 1, targetScale: 1,
     };
 
     function onMove(e) {
       s.tx = e.clientX; s.ty = e.clientY;
-      if (!s.visible) { s.visible = true; root.classList.add("is-visible"); }
-    }
-    function applyTint(el) {
-      if (isPhotoTarget(el)) {
-        // lente: backdrop-filter en el propio círculo, solo tiñe lo que tiene detrás
-        root.classList.add("is-photo");
-        root.classList.remove("is-solid");
-        root.style.removeProperty("--cursor-fill");
-        return;
+      if (!s.visible) {
+        // al aparecer, saltar exacto a la posición del cursor (no volar desde una
+        // posición inicial vieja/0 si la página cargó con innerWidth aún sin medir)
+        s.bx = s.tx; s.by = s.ty;
+        s.visible = true;
+        root.classList.add("is-visible");
       }
-      root.classList.remove("is-photo");
-      const fill = el && cursorTintFor(el);
-      if (fill) { root.style.setProperty("--cursor-fill", fill); root.classList.add("is-solid"); }
-      else { root.style.removeProperty("--cursor-fill"); root.classList.remove("is-solid"); }
+    }
+    // sobre fotos → lente duotono (is-photo); en cualquier otra superficie el
+    // círculo de inversión basta (sin clases extra).
+    function applyTint(el) {
+      root.classList.toggle("is-photo", isPhotoTarget(el));
     }
     function onLeave() {
       s.visible = false;
-      root.classList.remove("is-visible", "is-solid", "is-photo");
-      root.style.removeProperty("--cursor-fill");
+      root.classList.remove("is-visible", "is-photo");
     }
     function onOver(e) {
-      if (e.target.closest?.(CURSOR_TARGETS)) root.classList.add("is-hovering");
-      applyTint(e.target); // recomputa el tinte/lente al entrar a cada elemento
+      if (e.target.closest?.(CURSOR_TARGETS)) { root.classList.add("is-hovering"); s.targetScale = 4; }
+      applyTint(e.target); // recomputa la lente al entrar a cada elemento
     }
     function onOut(e) {
-      if (!e.relatedTarget?.closest?.(CURSOR_TARGETS)) root.classList.remove("is-hovering");
+      if (!e.relatedTarget?.closest?.(CURSOR_TARGETS)) { root.classList.remove("is-hovering"); s.targetScale = 1; }
     }
 
-    // loop: la bola sigue al mouse con un leve retardo (lerp)
+    // loop: la bola sigue al mouse con retardo (lerp) y el escalado en hover se
+    // anima en el mismo transform (sin transition CSS, que laggearía el seguimiento)
     function tick() {
       s.bx += (s.tx - s.bx) * 0.18; s.by += (s.ty - s.by) * 0.18;
-      big.style.transform = `translate3d(${(s.bx - 20).toFixed(2)}px, ${(s.by - 20).toFixed(2)}px, 0)`;
+      s.scale += (s.targetScale - s.scale) * 0.2;
+      ball.style.transform = `translate3d(${s.bx.toFixed(2)}px, ${s.by.toFixed(2)}px, 0) scale(${s.scale.toFixed(3)})`;
       s.raf = requestAnimationFrame(tick);
     }
 
@@ -510,8 +527,7 @@
       if (!s.on) return;
       s.on = false;
       document.body.classList.remove("is-cursor-custom");
-      root.classList.remove("is-visible", "is-hovering", "is-solid", "is-photo");
-      root.style.removeProperty("--cursor-fill");
+      root.classList.remove("is-visible", "is-hovering", "is-photo");
       window.removeEventListener("mousemove", onMove);
       document.removeEventListener("mouseleave", onLeave);
       document.removeEventListener("pointerover", onOver);

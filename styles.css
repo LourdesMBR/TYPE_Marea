@@ -249,10 +249,25 @@ noscript .mira-typing-line { width: auto !important; border-right: 0 !important;
 .site-footer__social a:hover { color: var(--color-turquoise); }
 
 @media (max-width: 767px) {
-  .site-footer__grid { grid-template-columns: 1fr 1fr; gap: var(--space-7) var(--space-5); }
-  .site-footer__brand { grid-column: 1 / -1; }
-  .site-footer__bottom > :not(.site-footer__social) { margin-right: 0; width: 100%; }
-  .site-footer__social { gap: var(--space-2); margin-left: 0; }
+  /* grid 2 columnas con reagrupamiento por colocación (el HTML no cambia, así el
+     desktop de 4 columnas queda intacto):
+       col1 (fila1) logo    · col2 (fila1) Con el apoyo de
+       col1 (fila2) Información · col2 (fila2) Mapa de sitio */
+  .site-footer__grid { grid-template-columns: 1fr 1fr; gap: var(--space-6) var(--space-5); align-items: start; }
+  .site-footer__brand            { grid-column: 1; grid-row: 1; margin-bottom: 0; }
+  .site-footer__grid > :nth-child(2) { grid-column: 2; grid-row: 1; } /* Con el apoyo de */
+  .site-footer__grid > :nth-child(3) { grid-column: 1; grid-row: 2; } /* Información */
+  .site-footer__grid > :nth-child(4) { grid-column: 2; grid-row: 2; } /* Mapa de sitio */
+
+  /* barra inferior: fila1 = políticas | términos; fila2 = copyright centrado;
+     fila3 = redes centradas (las tres ocupando el ancho completo) */
+  .site-footer__bottom { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+  /* anula el margin-right:auto del desktop (misma especificidad, gana por orden) */
+  .site-footer__bottom > :not(.site-footer__social) { margin-right: 0; }
+  .site-footer__bottom > :nth-child(1) { grid-column: 1 / -1; grid-row: 2; justify-self: stretch; text-align: center; } /* copyright */
+  .site-footer__bottom > :nth-child(2) { grid-column: 1; grid-row: 1; justify-self: start; }      /* políticas */
+  .site-footer__bottom > :nth-child(3) { grid-column: 2; grid-row: 1; justify-self: end; }         /* términos */
+  .site-footer__social { grid-column: 1 / -1; grid-row: 3; justify-content: center; margin: 0; gap: var(--space-2); }
 }
 
 @media (max-width: 1023px) {
@@ -365,12 +380,14 @@ body:not(.is-loading) .hero__title-line--bold .word {
 
 .mira-intro__img { display: block; width: 100%; height: 100%; border-radius: var(--radius-sm); object-fit: cover; box-shadow: 0 20px 50px rgba(0,0,0,0.45); }
 
-/* Flip al pasar el mouse: revela título + autor de la obra. Solo en dispositivos con hover real. */
-.mira-intro__card-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; }
+/* Flip: revela título + autor. En desktop por hover; en touch por tap (.is-flipped
+   lo togglea JS, ver initMira). La transición vive fuera del media query para que
+   el giro se anime también en mobile. */
+.mira-intro__card-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform var(--dur-slow) var(--ease-out); }
 @media (hover: hover) and (pointer: fine) {
-  .mira-intro__card-inner { transition: transform var(--dur-slow) var(--ease-out); }
   .mira-intro__card:hover .mira-intro__card-inner { transform: rotateY(180deg); }
 }
+.mira-intro__card.is-flipped .mira-intro__card-inner { transform: rotateY(180deg); }
 .mira-intro__card-face { position: absolute; inset: 0; backface-visibility: hidden; border-radius: var(--radius-sm); }
 .mira-intro__card-face--back {
   transform: rotateY(180deg);
@@ -423,6 +440,9 @@ body:not(.is-loading) .hero__title-line--bold .word {
 .mira-panel__figure figcaption em { font-style: italic; font-size: var(--fs-caption); opacity: 0.7; }
 
 .mira-panel--perfeccion { flex-direction: row; align-items: center; gap: var(--space-8); padding-right: clamp(2rem, 1rem + 4vw, 6rem); }
+/* el slide "Arte, ciencia..." solo existe en mobile; en desktop ese texto vive como
+   2da columna de Perfección (ver .mira-panel__col-arte) */
+.mira-panel--perfeccion-b { display: none; }
 .mira-panel__cols { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-7); position: relative; z-index: 1; }
 .mira-panel__cols h3 { margin-bottom: var(--space-4); }
 .mira-panel__cols .text-body + .text-body { margin-top: var(--space-3); }
@@ -545,35 +565,54 @@ body:not(.is-loading) .hero__title-line--bold .word {
 }
 .mira-bar__dropdown button:hover { background: rgba(0,0,0,0.06); }
 
-@media (min-width: 1024px) {
-  /* la altura real (N paneles × 100vh) la fija JS según la cantidad de paneles */
-  .hscroll[data-hscroll-mode="hijack"] .hscroll__viewport { position: sticky; top: 0; height: 100vh; overflow: hidden; }
-  .hscroll[data-hscroll-mode="hijack"] .hscroll__track { height: 100%; overflow: hidden; scroll-snap-type: none; }
-  .hscroll[data-hscroll-mode="hijack"] .mira-panel { height: 100%; }
-}
+/* hijack (desktop + mobile): el atributo lo pone JS solo cuando caps.hijack
+   (todos los dispositivos salvo reduced-motion). La altura real (N×100vh) la
+   fija JS según la cantidad de paneles. */
+.hscroll[data-hscroll-mode="hijack"] .hscroll__viewport { position: sticky; top: 0; height: 100vh; overflow: hidden; }
+.hscroll[data-hscroll-mode="hijack"] .hscroll__track { height: 100%; overflow: hidden; scroll-snap-type: none; }
+.hscroll[data-hscroll-mode="hijack"] .mira-panel { height: 100%; }
 
 @media (max-width: 1023px) {
-  .mira-panel { width: 92vw; margin-right: 4vw; height: 78vh; min-height: 560px; overflow-y: auto; }
+  /* en hijack cada panel ocupa el viewport; si el contenido excede, scrollea
+     verticalmente dentro del panel (el gesto táctil lo recibe el scroller interno).
+     Scrollbar oculta: scrollea pero sin barra visible. */
+  .hscroll[data-hscroll-mode="hijack"] .mira-panel { overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
+  .hscroll[data-hscroll-mode="hijack"] .mira-panel::-webkit-scrollbar { display: none; }
+  /* fallback sin hijack (reduced-motion): scroll horizontal nativo con peek */
+  .hscroll:not([data-hscroll-mode="hijack"]) .mira-panel { width: 92vw; margin-right: 4vw; min-height: 78vh; }
+
+  /* la barra de línea de tiempo no va en mobile */
+  .mira-bar { display: none; }
+
+  /* intro: el collage crece para llenar el viewport (sin hueco negro abajo) */
+  .mira-panel--intro { display: flex; flex-direction: column; justify-content: center; gap: var(--space-5); }
+  .mira-intro__head, .mira-intro__cta, .mira-intro__subtitle, .mira-intro__caption { position: static; width: auto; }
+  .mira-intro__cta { align-self: flex-start; }
+  .mira-intro__media { flex: 1 1 auto; min-height: 230px; }
+
+  /* paneles de contenido: una sola columna + tipografía compacta para que el
+     contenido entre en ~100vh (minimiza el scroll interno de los paneles) */
+  .mira-panel__bignum { font-size: clamp(5rem, 3rem + 14vw, 9rem); }
+  .mira-panel__body .text-h2 { font-size: clamp(1.4rem, 1.1rem + 2.2vw, 2rem); margin-bottom: var(--space-3); }
+  .mira-panel .text-body { font-size: 0.9rem; }
+  .mira-panel__body .text-body + .text-body { margin-top: var(--space-3); }
   .mira-panel--barroco { flex-direction: column; }
-  .mira-panel__split-img { flex: 0 0 45%; }
-  .mira-panel--perfeccion { flex-direction: column; gap: var(--space-6); }
-  .mira-panel__figure { margin-right: 0; max-width: 220px; }
+  .mira-panel__split-img { flex: 0 0 38vh; }
+  .mira-panel--perfeccion { flex-direction: column; gap: var(--space-5); }
+  .mira-panel__figure { margin-right: 0; max-width: 150px; }
+  /* perfección en mobile: una sola columna. La 2da ("Arte, ciencia...") se oculta
+     acá y pasa a su propio slide (.mira-panel--perfeccion-b). */
   .mira-panel__cols { grid-template-columns: 1fr; }
+  .mira-panel__col-arte { display: none; }
+  .mira-panel--perfeccion-b { display: flex; }
   .mira-panel__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); }
   .mira-panel__grid figure:nth-child(n) { transform: none; }
   .mira-panel__body--espectaculo { grid-template-columns: 1fr !important; }
   /* en mobile no entran lado a lado: la imagen baja debajo del texto, ya no sangra el borde */
   .mira-panel--renacimiento .mira-panel__side-img {
     position: static; right: auto; top: auto; transform: none;
-    width: min(70%, 320px); margin: var(--space-7) auto 0; border-radius: var(--radius-sm);
+    width: min(60%, 280px); margin: var(--space-5) auto 0; border-radius: var(--radius-sm);
   }
-  .hscroll__track { padding-bottom: var(--space-4); }
-  .mira-bar { gap: var(--space-4); padding: var(--space-4) var(--container-padding-x); }
-  .mira-bar__tabs { gap: var(--space-2); }
-  .mira-bar__tab > button { padding: 0.4em 0.8em; font-size: 0.75rem; }
-  .mira-bar__dropdown { min-width: 200px; }
-  /* el último tab queda cerca del borde derecho: el dropdown se abre hacia la izquierda para no salirse */
-  .mira-bar__tab:last-child .mira-bar__dropdown { left: auto; right: 0; }
 }
 
 /* ---------- 7. MARQUEES ---------- */
@@ -748,6 +787,9 @@ body:not(.is-loading) .hero__title-line--bold .word {
 .mostra__grid { display: grid; grid-template-columns: 1fr; gap: var(--space-6); align-items: start; max-width: 56ch; }
 .mostra__col .text-body + .text-body { margin-top: var(--space-5); }
 .mostra__pullquote { max-width: 56ch; margin-top: var(--space-8); }
+/* en desktop la frase destacada vive en la barra (debajo del botón); acá se oculta
+   para no duplicarla. En mobile la barra está oculta, así que esta sí se muestra. */
+@media (min-width: 1024px) { .mostra__pullquote { display: none; } }
 
 /* paneles de obra: imagen/bloque de color a un lado, texto al otro — alternan con
    --reverse para que la galería no se sienta como una fila repetida de lo mismo */
@@ -757,10 +799,14 @@ body:not(.is-loading) .hero__title-line--bold .word {
 }
 .mostra-panel--reverse { flex-direction: row-reverse; }
 
-.mostra-panel__media { flex: 0 0 46%; }
+.mostra-panel__media { flex: 0 0 46%; position: relative; aspect-ratio: 4/5; overflow: hidden; }
+/* sangrado vertical para el parallax: top/left + width/height explícitos (no el
+   shorthand "inset"), igual que el de Mirá — en un <img> (elemento reemplazado),
+   fijar los 4 lados sin alto explícito cae al tamaño intrínseco y el alto
+   calculado se puede ir a 0. */
 .mostra-panel__media img,
 .mostra-panel__media .mostra__obra-card-cover {
-  width: 100%; aspect-ratio: 4/5; object-fit: cover;
+  position: absolute; top: -10%; left: 0; width: 100%; max-width: none; height: 120%; object-fit: cover;
 }
 .mostra-panel__media .mostra__obra-card-cover {
   display: flex; align-items: center; justify-content: center; padding: var(--space-5); text-align: center;
@@ -778,14 +824,22 @@ body:not(.is-loading) .hero__title-line--bold .word {
 .mostra__obra-author { font-size: var(--fs-caption); opacity: 0.7; font-style: italic; margin-block: 2px var(--space-3); }
 .mostra-panel__info .text-body { font-size: 0.95rem; }
 
-/* barra superior fija: "Obras del mes" a la izquierda, CTA al extremo derecho */
+/* bloque fijo a la derecha: "Obras del mes" + CTA + frase destacada, apilados.
+   Va a la derecha para no chocar con "03. Mostrá" (izquierda). top debajo del
+   header (sticky, ~66px) para no quedar tapado por él. */
 .mostra-bar {
-  position: absolute; top: 0; left: 0; right: 0; z-index: var(--z-hscroll-nav);
-  display: flex; justify-content: space-between; align-items: center; gap: var(--space-5);
-  padding: var(--space-5) var(--container-padding-x);
+  position: absolute; top: clamp(5rem, 4rem + 2vw, 6.5rem); right: 0; left: auto;
+  z-index: var(--z-hscroll-nav);
+  display: flex; justify-content: flex-end;
+  padding-inline: var(--container-padding-x);
 }
-.mostra-bar__eyebrow { color: var(--color-magenta); }
+.mostra-bar__cta {
+  display: flex; flex-direction: column; align-items: flex-end; gap: var(--space-3);
+  text-align: right; max-width: 34ch;
+}
+.mostra-bar__eyebrow { color: var(--color-magenta); margin: 0; }
 .mostra-bar .link-cta { font-size: var(--fs-caption); }
+.mostra-bar__pullquote { font-size: var(--fs-caption); max-width: 28ch; }
 
 .mostra__cta-band { background: var(--color-black); color: var(--color-white); padding-block: var(--space-9); text-align: center; }
 .mostra__cta-band .text-h2 { max-width: 20ch; margin-inline: auto; margin-bottom: var(--space-9); }
@@ -798,21 +852,34 @@ body:not(.is-loading) .hero__title-line--bold .word {
 .mostra__cta-frame-img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
 .mostra__cta-frame .btn { position: relative; z-index: 1; }
 
-@media (min-width: 1024px) {
-  /* la altura real (N paneles × 100vh) la fija JS según la cantidad de paneles */
-  .mostra-hscroll[data-hscroll-mode="hijack"] .mostra-hscroll__viewport { position: sticky; top: 0; height: 100vh; overflow: hidden; }
-  .mostra-hscroll[data-hscroll-mode="hijack"] .mostra-hscroll__track { height: 100%; overflow: hidden; scroll-snap-type: none; }
-  .mostra-hscroll[data-hscroll-mode="hijack"] .mostra-panel { height: 100%; }
-}
+/* hijack (desktop + mobile): mismo mecanismo que Mirá; el atributo lo pone JS
+   solo cuando caps.hijack. La altura real (N×100vh) la fija JS. */
+.mostra-hscroll[data-hscroll-mode="hijack"] .mostra-hscroll__viewport { position: sticky; top: 0; height: 100vh; overflow: hidden; }
+.mostra-hscroll[data-hscroll-mode="hijack"] .mostra-hscroll__track { height: 100%; overflow: hidden; scroll-snap-type: none; }
+.mostra-hscroll[data-hscroll-mode="hijack"] .mostra-panel { height: 100%; }
 
 @media (max-width: 1023px) {
-  .mostra-panel { width: 92vw; margin-right: 4vw; height: 78vh; min-height: 560px; overflow-y: auto; }
-  .mostra-panel--obra, .mostra-panel--reverse { flex-direction: column; align-items: stretch; padding-inline: var(--container-padding-x); gap: var(--space-6); }
-  .mostra-panel__media { flex: 0 0 auto; }
+  /* en hijack cada panel ocupa el viewport; si el contenido excede, scrollea
+     verticalmente dentro (clave para el intro de 3 párrafos). Scrollbar oculta. */
+  .mostra-hscroll[data-hscroll-mode="hijack"] .mostra-panel { overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
+  .mostra-hscroll[data-hscroll-mode="hijack"] .mostra-panel::-webkit-scrollbar { display: none; }
+  /* fallback sin hijack (reduced-motion): scroll horizontal nativo con peek */
+  .mostra-hscroll:not([data-hscroll-mode="hijack"]) .mostra-panel { width: 92vw; margin-right: 4vw; min-height: 78vh; }
+
+  /* más aire arriba en mobile (la barra "Obras del mes" ya no reserva espacio) */
+  .mostra-panel { padding-top: clamp(7rem, 5rem + 9vw, 9.5rem); }
+
+  /* la barra "Obras del mes" no va en mobile (resuelve el texto superpuesto) */
+  .mostra-bar { display: none; }
+
+  .mostra-panel--obra, .mostra-panel--reverse { flex-direction: column; align-items: stretch; padding-inline: var(--container-padding-x); gap: var(--space-5); }
+  .mostra-panel__media { flex: 0 0 auto; aspect-ratio: 4/3; }
   .mostra-panel__info { max-width: none; }
-  .mostra-hscroll__track { padding-bottom: var(--space-4); }
-  .mostra-bar { padding: var(--space-4) var(--container-padding-x); }
+  /* tipografía mobile: evitar textos pisados / que entre en el panel */
+  .mostra__head .text-h1 { font-size: clamp(2rem, 1.5rem + 3vw, 3rem); margin-block: var(--space-2) 0; }
+  .mostra__subtitle { margin-block: var(--space-4) var(--space-5); font-size: clamp(1rem, 0.95rem + 1vw, 1.125rem); }
   .mostra__grid, .mostra__pullquote { max-width: none; }
+  .mostra__col .text-body + .text-body { margin-top: var(--space-3); }
   .mostra__cta-frame { width: clamp(280px, 84vw, 560px); }
 }
 
@@ -937,51 +1004,44 @@ body:not(.is-loading) .hero__title-line--bold .word {
 }
 
 /* ---------- 14. CURSOR PERSONALIZADO (circle-follow, adaptado de ctf0 sin GSAP) ----------
-   Bola grande con retardo + bola chica que sigue de cerca, ambas con mix-blend-mode
-   difference para invertir el fondo (no depende de la paleta). JS añade .is-cursor-custom
-   al body solo en desktop con mouse fino y sin reduced-motion; la traslación la maneja
-   un loop rAF, el escalado en hover es transición CSS pura sobre el svg interno. */
+   Un solo círculo (div, no SVG) que sigue al mouse con retardo (lerp en rAF) y crece
+   en hover. mix-blend-mode:difference invierte el fondo real (blanco→negro, negro→
+   blanco, color→inverso) sin depender de la paleta. JS añade .is-cursor-custom al body
+   solo en desktop con mouse fino y sin reduced-motion. */
 .cursor { display: none; }
 
 body.is-cursor-custom { cursor: none; }
-/* anula los cursores nativos (grab/pointer/text-pointer) mientras el personalizado está activo;
-   solo afecta la propiedad cursor, no el caret de edición dentro de inputs */
+/* anula los cursores nativos mientras el personalizado está activo */
 body.is-cursor-custom * { cursor: none !important; }
 
-/* CLAVE: .cursor NO debe crear stacking context propio (sin position, z-index ni
-   opacity<1). Si lo hiciera, el mix-blend-mode de las bolas quedaría aislado y
-   dejaría de mezclarse con la tipografía/contenido de la página (se verían discos
-   blancos sólidos tapando el texto). Por eso el z-index vive en las bolas y la
-   aparición es por display, igual que en el CodePen de referencia. */
-body.is-cursor-custom .cursor.is-visible { display: block; pointer-events: none; }
+body.is-cursor-custom .cursor.is-visible { display: block; }
 
+/* CLAVE: el mix-blend-mode va en el MISMO elemento fijo, no en un hijo dentro de un
+   contenedor fijo. position:fixed crea un stacking context: si el blend estuviera en
+   un hijo, quedaría aislado y blendearía contra la nada (círculo blanco sólido,
+   invisible sobre fondo blanco) en vez de invertir la página. Acá .cursor__ball es
+   hijo directo de .cursor (estático) → su blend se resuelve contra la página real.
+   El centrado en el punto del cursor es por margin negativo (mitad del tamaño); el
+   translate (seguimiento) y el scale (hover) los maneja JS en el mismo transform, sin
+   transition, para que el seguimiento no quede laggeado. */
 .cursor__ball {
-  position: fixed; top: 0; left: 0; z-index: 9999;
-  mix-blend-mode: difference; will-change: transform;
+  position: fixed; top: 0; left: 0;
+  width: 40px; height: 40px;
+  margin: -20px 0 0 -20px;
+  border-radius: 50%;
+  background: var(--color-white);
+  mix-blend-mode: difference;
+  pointer-events: none;
+  z-index: 9999;
+  will-change: transform;
 }
-/* modo "tinte": color sólido exacto (blend normal) sobre superficies de marca y sobre
-   fotos. El difference invierte el fondo (no permite elegir un color arbitrario: el
-   inverso del turquesa es rojo, etc.); para tomar un color específico el cursor pasa a
-   ser opaco en esas zonas. El color lo fija JS según el fondo real bajo el cursor. */
-.cursor.is-solid .cursor__ball { mix-blend-mode: normal; }
-.cursor__ball circle { fill: var(--cursor-fill, var(--color-white)); }
-
-/* la bola grande crece de forma fluida al pasar sobre elementos interactivos */
-.cursor__ball--big { border-radius: 50%; }
-.cursor__ball--big svg { transform-origin: center; transition: transform var(--dur-base) var(--ease-out); }
-.cursor.is-hovering .cursor__ball--big svg { transform: scale(4); }
-/* en modo sólido el escalado es menor para que el disco opaco no tape el botón entero */
-.cursor.is-solid.is-hovering .cursor__ball--big svg { transform: scale(2); }
 
 /* ---------- Lente duotono magenta DENTRO del círculo, solo sobre fotos ----------
-   El círculo grande funciona como lente: con backdrop-filter tiñe en magenta (duotono)
-   sólo la porción de la imagen que tiene detrás, únicamente dentro del círculo, al pasar
-   por encima. Removible: quitá la clase fx-photo-duotone del <body> (sin ella, sobre
-   fotos el cursor queda como disco blanco neutro, sin invertir la imagen). */
-.cursor.is-photo .cursor__ball { mix-blend-mode: normal; }
-body.fx-photo-duotone .cursor.is-photo .cursor__ball--big {
+   Sobre fotos el círculo deja de invertir y funciona como lente: backdrop-filter tiñe
+   en magenta (duotono) sólo lo que tiene detrás, dentro del círculo. Removible: quitá
+   la clase fx-photo-duotone del <body>. */
+.cursor.is-photo .cursor__ball { mix-blend-mode: normal; background: transparent; }
+body.fx-photo-duotone .cursor.is-photo .cursor__ball {
   -webkit-backdrop-filter: grayscale(1) sepia(1) saturate(3.4) hue-rotate(260deg) contrast(1.08);
           backdrop-filter: grayscale(1) sepia(1) saturate(3.4) hue-rotate(260deg) contrast(1.08);
 }
-/* dentro de la lente el relleno blanco desaparece para que se vea la imagen filtrada */
-body.fx-photo-duotone .cursor.is-photo .cursor__ball--big circle { fill: transparent; }
