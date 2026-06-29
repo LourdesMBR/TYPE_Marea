@@ -40,13 +40,13 @@ body {
   /* Paleta base */
   --color-white: #FFFFFF;
   --color-black: #000000;
-  --color-turquoise: #00FFD0;
+  --color-turquoise: #F137A5;
   --color-lime: #CEF564;
-  --color-magenta: #F137A6;
+  --color-magenta: #4100F5;
 
   /* Botones (regla obligatoria: primario siempre turquesa) */
   --btn-primary-bg: var(--color-turquoise);
-  --btn-primary-text: var(--color-black);
+  --btn-primary-text: var(--color-white);
 
   /* Tipografía */
   --font-display: "Bricolage Grotesque", sans-serif;
