@@ -93,6 +93,10 @@ body {
   --z-header: 50;
   --z-hscroll-nav: 40;
   --z-overlay: 100;
+
+  /* alto aprox. del header sticky: las subpáginas (overlays) dejan este espacio
+     arriba para no quedar tapadas por el nav, que permanece visible */
+  --header-h: 64px;
 }
 
 /* ---------- 3. PRIMITIVES ---------- */
@@ -965,6 +969,213 @@ body:not(.is-loading) .hero__title-line--bold .word {
   .aprende-band--asc .aprende-band__head { padding-inline: var(--space-4) var(--container-padding-x); }
   .aprende-band__label { font-size: clamp(1rem, 0.8rem + 2.2vw, 1.3rem); line-height: 1.1; }
   .aprende-floating { padding-block: var(--space-6) var(--space-5); }
+}
+
+/* ---------- 11b. SUBPÁGINAS APRENDÉ (overlays: por color / por autor) ----------
+   Overlays que se abren desde las bandas de Aprendé. Reutilizan tokens, tipografía,
+   container y grilla de la landing. z-index por DEBAJO del header para que el nav
+   sticky siga visible; el contenido deja un espacio superior (--header-h) para no
+   quedar tapado por él. */
+.porcolor, .porautor {
+  position: fixed; inset: 0; z-index: calc(var(--z-header) - 1);
+  background: var(--color-white); color: var(--color-black);
+  overflow-y: auto;
+  opacity: 0; visibility: hidden;
+  transition: opacity var(--dur-base) var(--ease-out), visibility var(--dur-base);
+}
+.porcolor.is-open, .porautor.is-open { opacity: 1; visibility: visible; }
+body.overlay-open { overflow: hidden; }
+
+.porcolor__inner, .porautor__inner {
+  position: relative; min-height: 100vh;
+  display: flex; flex-direction: column;
+  padding-top: calc(var(--header-h) + var(--space-7));
+  padding-bottom: var(--section-padding-y);
+}
+
+.porcolor__close {
+  position: absolute; top: calc(var(--header-h) + var(--space-3)); right: var(--container-padding-x);
+  width: 48px; height: 48px; display: inline-flex; align-items: center; justify-content: center;
+  border: 1.5px solid var(--color-black); border-radius: var(--radius-pill);
+  background: var(--color-white);
+  transition: background-color var(--dur-fast), color var(--dur-fast);
+}
+.porcolor__close:hover { background: var(--color-black); color: var(--color-white); }
+.porcolor__close svg { width: 22px; height: 22px; }
+
+.porcolor__title { margin-bottom: var(--space-9); max-width: 18ch; }
+
+.porcolor__grid {
+  flex: 1; display: grid; grid-template-columns: 1.1fr 1fr 1fr;
+  gap: var(--space-8); align-items: center; align-content: center;
+}
+.porcolor__wheel-col { display: flex; justify-content: center; }
+
+/* --- rueda cromática --- */
+.colorwheel { position: relative; width: min(92%, 460px); aspect-ratio: 1; }
+.colorwheel__svg { width: 100%; height: 100%; overflow: visible; }
+
+/* el aro de color gira lento y continuo; se pausa al pasar el cursor o al enfocar
+   un segmento para poder elegir con precisión. transform-origin al centro del viewBox. */
+.colorwheel__ring {
+  transform-box: view-box; transform-origin: 100px 100px;
+  animation: colorwheel-spin 60s linear infinite;
+}
+.colorwheel:hover .colorwheel__ring,
+.colorwheel:focus-within .colorwheel__ring { animation-play-state: paused; }
+@keyframes colorwheel-spin { to { transform: rotate(360deg); } }
+
+.colorwheel__seg {
+  stroke-width: 20; cursor: pointer;
+  transform-box: fill-box; transform-origin: center;
+  transform: rotate(var(--rot));
+  transition: transform var(--dur-base) var(--ease-out),
+              filter var(--dur-base) var(--ease-out),
+              opacity var(--dur-base) var(--ease-out);
+  border:none;
+  outline: none;
+}
+.colorwheel__seg:hover,
+.colorwheel__seg:focus-visible {
+  transform: rotate(var(--rot)) scale(1.06);
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,0.28));
+  outline: none;
+  border:none;
+  outline: none;
+}
+/* selección activa: el segmento elegido queda destacado y el resto se atenúa */
+.colorwheel.has-selection .colorwheel__seg:not(.is-active) { opacity: 0.4; }
+.colorwheel__seg.is-active {
+  transform: rotate(var(--rot)) scale(1.06);
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,0.28));
+  border:none;
+  outline: none;
+}
+
+.colorwheel__center {
+  position: absolute; inset: 0; pointer-events: none;
+  display: flex; align-items: center; justify-content: center; text-align: center;
+}
+.colorwheel__hint {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: var(--fs-subtitle); line-height: var(--lh-base); color: var(--color-black);
+  max-width: 7ch;
+}
+
+/* --- columna de obra (imagen) --- */
+.porcolor__art {
+  position: relative; display: flex; align-items: center; justify-content: center;
+  min-height: clamp(280px, 34vw, 520px);
+}
+.porcolor__img {
+  max-width: 100%; max-height: 64vh; width: auto; height: auto; object-fit: contain;
+  opacity: 0; transition: opacity var(--dur-base) var(--ease-out);
+}
+.porcolor__art-empty {
+  position: absolute; font-size: var(--fs-caption);
+  color: rgba(0,0,0,0.45); text-align: center; max-width: 22ch;
+}
+
+/* --- columna de info (ficha de la pieza: año · autor, título, descripción) --- */
+.porcolor__info {
+  display: flex; flex-direction: column; gap: var(--space-3); max-width: 42ch;
+  opacity: 0; transition: opacity var(--dur-base) var(--ease-out);
+}
+.porcolor__info.is-shown { opacity: 1; }
+.porcolor__obra-meta { display: flex; flex-wrap: wrap; gap: var(--space-4); font-size: var(--fs-caption); }
+.porcolor__obra-author { opacity: 0.7; }
+.porcolor__obra-title {
+  font-family: var(--font-display); font-weight: 700; font-size: var(--fs-h2);
+  line-height: var(--lh-base); color: var(--color-magenta); margin-block: var(--space-1) var(--space-3);
+}
+.porcolor__obra-desc { color: var(--color-black); }
+
+/* tablet: rueda arriba, imagen + info debajo en dos columnas */
+@media (max-width: 1100px) {
+  .porcolor__grid { grid-template-columns: 1fr 1fr; }
+  .porcolor__wheel-col { grid-column: 1 / -1; margin-bottom: var(--space-6); }
+}
+/* mobile: una sola columna (título → rueda → imagen → info) */
+@media (max-width: 760px) {
+  .porcolor__grid { grid-template-columns: 1fr; gap: var(--space-7); align-items: stretch; }
+  .porcolor__wheel-col { grid-column: auto; margin-bottom: 0; }
+  .porcolor__title { margin-bottom: var(--space-7); max-width: none; }
+  .colorwheel { width: min(86%, 360px); }
+  .porcolor__art { min-height: clamp(240px, 70vw, 420px); }
+  .porcolor__img { max-height: 56vh; }
+  .porcolor__info { max-width: none; }
+  .porcolor__close { width: 44px; height: 44px; }
+}
+
+/* ---------- 11c. APRENDÉ POR AUTOR (overlay) ----------
+   Índice alfabético en grilla fluida + ficha del artista en dos columnas. */
+.porautor__title { margin-bottom: var(--space-4); }
+.porautor__index-label { color: var(--color-black); opacity: 0.6; margin-bottom: var(--space-6); }
+
+/* índice en carrusel: una sola fila de columnas-letra que se desplaza con flechas */
+.porautor__index-wrap { display: flex; align-items: center; gap: var(--space-3); }
+.porautor__index {
+  flex: 1 1 auto; min-width: 0;
+  display: flex; flex-direction: row; align-items: start;
+  gap: var(--space-6); overflow-x: auto; scroll-behavior: smooth;
+  scroll-snap-type: x proximity; padding-bottom: var(--space-2);
+  scrollbar-width: none; -ms-overflow-style: none;
+}
+.porautor__index::-webkit-scrollbar { display: none; }
+.porautor__letter-col { flex: 0 0 clamp(150px, 16vw, 185px); scroll-snap-align: start; }
+
+.porautor__arrow {
+  flex: 0 0 auto;
+  width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center;
+  border: 1.5px solid var(--color-black); border-radius: var(--radius-pill); background: var(--color-white);
+  transition: background-color var(--dur-fast), color var(--dur-fast), opacity var(--dur-fast);
+}
+.porautor__arrow:hover { background: var(--color-black); color: var(--color-white); }
+.porautor__arrow svg { width: 20px; height: 20px; }
+.porautor__arrow[disabled] { opacity: 0.25; pointer-events: none; }
+
+.porautor__letter { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-h3); margin-bottom: var(--space-3); }
+.porautor__list { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); }
+.porautor__author {
+  text-align: left; font-size: var(--fs-body); line-height: 1.35;
+  color: var(--color-black); cursor: pointer;
+  transition: color var(--dur-base) var(--ease-out);
+}
+.porautor__author:hover { color: var(--color-magenta); }
+.porautor__author.is-active { color: var(--color-magenta); font-weight: 700; }
+
+.porautor__divider { border: 0; border-top: 1px solid rgba(0,0,0,0.18); margin-block: var(--space-8); }
+
+/* ficha: izquierda (meta + nombre + retrato), derecha (biografía), con fade al cambiar.
+   Áreas nombradas: en desktop el nombre va arriba-izq, el retrato debajo, la bio a la
+   derecha ocupando ambas filas. En mobile se apilan: nombre → bio → retrato. */
+.porautor__ficha {
+  display: grid; grid-template-columns: 1fr 1fr;
+  grid-template-areas: "head bio" "portrait bio";
+  gap: var(--space-7) var(--space-8); align-content: start;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+.porautor__ficha.is-swapping { opacity: 0; }
+.porautor__head { grid-area: head; }
+.porautor__bio { grid-area: bio; }
+.porautor__portrait { grid-area: portrait; }
+
+.porautor__meta { display: flex; gap: var(--space-6); font-size: var(--fs-caption); margin-bottom: var(--space-5); }
+.porautor__name { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-display); line-height: var(--lh-base); color: var(--color-magenta); }
+.porautor__portrait { display: flex; align-items: flex-start; }
+.porautor__portrait img {
+  width: 100%; max-width: 420px; height: auto; object-fit: contain;
+  opacity: 0; transition: opacity var(--dur-base) var(--ease-out);
+}
+.porautor__bio { display: flex; flex-direction: column; gap: var(--space-5); max-width: 56ch; }
+
+@media (max-width: 900px) {
+  .porautor__ficha {
+    grid-template-columns: 1fr;
+    grid-template-areas: "head" "bio" "portrait";
+    gap: var(--space-6);
+  }
+  .porautor__name { font-size: var(--fs-h1); }
 }
 
 /* ---------- 12. NEWSLETTER ---------- */

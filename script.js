@@ -42,6 +42,9 @@
     initMostraHscroll();
     initNewsletter();
     initCursor();
+    initColorExplorer();
+    initAuthorExplorer();
+    initOverlayGlobals();
 
     window.addEventListener("resize", debounce(() => {
       readCaps();
@@ -497,7 +500,7 @@
       root.classList.remove("is-visible", "is-photo");
     }
     function onOver(e) {
-      if (e.target.closest?.(CURSOR_TARGETS)) { root.classList.add("is-hovering"); s.targetScale = 4; }
+      if (e.target.closest?.(CURSOR_TARGETS)) { root.classList.add("is-hovering"); s.targetScale = 1.5; }
       applyTint(e.target); // recomputa la lente al entrar a cada elemento
     }
     function onOut(e) {
@@ -559,5 +562,580 @@
         button.innerHTML = originalLabel;
       }, 2400);
     });
+  }
+
+  /* ---------- Overlays de subpágina (genérico) ----------
+     Maneja apertura/cierre y foco de las subpáginas Aprendé (por color / por autor).
+     z-index por debajo del header → el nav del index queda visible y operativo. */
+  const _overlays = [];
+  function registerOverlay(overlay, openSelector) {
+    const closeBtn = overlay.querySelector("[data-overlay-close]");
+    let lastTrigger = null;
+    function open(trigger) {
+      lastTrigger = trigger || null;
+      overlay.classList.add("is-open");
+      overlay.setAttribute("aria-hidden", "false");
+      document.body.classList.add("overlay-open");
+      // diferir el foco: el overlay recién pasa de visibility:hidden a visible
+      setTimeout(() => (closeBtn || overlay).focus(), 60);
+    }
+    function close() {
+      overlay.classList.remove("is-open");
+      overlay.setAttribute("aria-hidden", "true");
+      if (!_overlays.some((o) => o.isOpen())) document.body.classList.remove("overlay-open");
+      if (lastTrigger && lastTrigger.focus) lastTrigger.focus();
+    }
+    const isOpen = () => overlay.classList.contains("is-open");
+    document.querySelectorAll(openSelector).forEach((trigger) => {
+      trigger.addEventListener("click", (e) => { e.preventDefault(); open(trigger); });
+      trigger.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(trigger); }
+      });
+    });
+    closeBtn && closeBtn.addEventListener("click", close);
+    const api = { open, close, isOpen };
+    _overlays.push(api);
+    return api;
+  }
+  function initOverlayGlobals() {
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") _overlays.forEach((o) => o.isOpen() && o.close());
+    });
+    // los links del nav cierran cualquier overlay abierto para que la navegación funcione
+    document.querySelectorAll(".site-header a[href^='#'], .mobile-nav a[href^='#']").forEach((a) => {
+      a.addEventListener("click", () => _overlays.forEach((o) => o.isOpen() && o.close()));
+    });
+  }
+
+  /* ---------- Aprendé por color (overlay con rueda cromática) ----------
+     Se abre desde la banda "Por color". Al elegir un color carga una obra al azar
+     de img/por color/<CARPETA>/ con crossfade y muestra su ficha (autor, año,
+     título, descripción). Metadatos editables abajo (algunos son aproximados). */
+  function initColorExplorer() {
+    const overlay = document.querySelector("[data-porcolor]");
+    if (!overlay) return;
+
+    // dir = carpeta; obras = [{ file, titulo, autor, anio, desc }]
+    const COLORS = {
+      amarillo: { name: "Amarillo", dir: "AMARILLO", obras: [
+        { file: "Gloria Ballestrin, Codo amarillo , 2020. Escultura, Madera sobre madera (1).jpg", titulo: "Codo amarillo", autor: "Gloria Ballestrin", anio: "2020", desc: "Escultura realizada en madera sobre madera." },
+        { file: "Infinity Mirror Room (1).jpg", titulo: "Infinity Mirror Room", autor: "Yayoi Kusama", anio: "", desc: "Instalación inmersiva de espejos y luces repetidas al infinito." },
+        { file: "Norris Yim, Nameless (1).jpg", titulo: "Nameless", autor: "Norris Yim", anio: "", desc: "Retrato contemporáneo de atmósfera introspectiva." },
+        { file: "images (12) (1).jpg", titulo: "Composición en amarillo", autor: "", anio: "", desc: "Obra seleccionada por su uso protagónico del amarillo." },
+      ]},
+      azul: { name: "Azul", dir: "AZUL", obras: [
+        { file: "A Bigger Splash (1).jpg", titulo: "A Bigger Splash", autor: "David Hockney", anio: "1967", desc: "Una piscina californiana y el instante exacto del salto." },
+        { file: "La gran ola de Kanagawa (1).jpg", titulo: "La gran ola de Kanagawa", autor: "Katsushika Hokusai", anio: "c. 1831", desc: "Estampa ukiyo-e con la ola gigante frente al monte Fuji." },
+        { file: "The Physical Impossibility of Death in the Mind of Someone Living (1).jpg", titulo: "The Physical Impossibility of Death in the Mind of Someone Living", autor: "Damien Hirst", anio: "1991", desc: "Un tiburón conservado en formol, ícono del Young British Art." },
+        { file: "koons-the-balloon-animal-editions-1995-2023-a-composition-gallery-102-1730997475-99478_345x345 (1).jpeg", titulo: "Balloon Dog", autor: "Jeff Koons", anio: "", desc: "Escultura de acero inoxidable pulido con forma de globo." },
+      ]},
+      marron: { name: "Marrón", dir: "MARRON", obras: [
+        { file: "Autumn Lake, New Hampshire - Edward W Nichols (1).jpg", titulo: "Autumn Lake, New Hampshire", autor: "Edward W. Nichols", anio: "", desc: "Paisaje otoñal en la tradición de la Escuela del río Hudson." },
+        { file: "Battersea Reach - James McNeill Whistler (1).jpg", titulo: "Battersea Reach", autor: "James McNeill Whistler", anio: "", desc: "Vista del Támesis en una gama de tonos sobrios." },
+      ]},
+      rojo: { name: "Rojo", dir: "ROJO", obras: [
+        { file: "Zdzisław Beksiński (1).jpg", titulo: "Sin título", autor: "Zdzisław Beksiński", anio: "", desc: "Surrealismo distópico: atmósferas oníricas y desoladas." },
+        { file: "Zdzisław Beksiński 02 (1).jpg", titulo: "Sin título", autor: "Zdzisław Beksiński", anio: "", desc: "Mundos imaginarios y arquitecturas imposibles." },
+      ]},
+      rosa: { name: "Rosa", dir: "ROSA", obras: [
+        { file: "BALLON FUCSIA(11).jpg", titulo: "Balloon Dog (Magenta)", autor: "Jeff Koons", anio: "", desc: "Versión fucsia de la célebre escultura de globo." },
+        { file: "Damien Hirst Cherry Blossoms.jpg", titulo: "Cherry Blossoms", autor: "Damien Hirst", anio: "2018", desc: "Grandes lienzos de flores en una explosión de color." },
+        { file: "Hell is a Teenage Girl (1).jpg", titulo: "Hell is a Teenage Girl", autor: "", anio: "", desc: "Obra contemporánea de estética pop y tono provocador." },
+        { file: "Takashi Murakami Seasons (1).jpg", titulo: "Seasons", autor: "Takashi Murakami", anio: "", desc: "Estética superflat: flores sonrientes y color saturado." },
+      ]},
+      verde: { name: "Verde", dir: "VERDE", obras: [
+        { file: "Early Spring in Central Park - Paul Cornoyer (1).jpg", titulo: "Early Spring in Central Park", autor: "Paul Cornoyer", anio: "", desc: "Impresionismo estadounidense; Nueva York en primavera." },
+        { file: "El jardín del Prado (1).webp", titulo: "El jardín del Prado", autor: "", anio: "", desc: "Vegetación y luz en una composición de verdes." },
+        { file: "La Trinidad - Colección (1).jpg", titulo: "La Trinidad", autor: "", anio: "", desc: "Obra de colección en una paleta de verdes." },
+        { file: "Van Gogh além das obras-primas (1).jpg", titulo: "Naturaleza en verde", autor: "Vincent van Gogh", anio: "", desc: "Pincelada vibrante característica del autor." },
+      ]},
+    };
+
+    const wheel = overlay.querySelector("[data-colorwheel]");
+    const segs = Array.from(overlay.querySelectorAll(".colorwheel__seg"));
+    const img = overlay.querySelector("[data-porcolor-img]");
+    const empty = overlay.querySelector("[data-porcolor-empty]");
+    const center = overlay.querySelector("[data-porcolor-center]");
+    const info = overlay.querySelector("[data-porcolor-info]");
+    const elAnio = overlay.querySelector("[data-pc-anio]");
+    const elAutor = overlay.querySelector("[data-pc-autor]");
+    const elTitulo = overlay.querySelector("[data-pc-titulo]");
+    const elDesc = overlay.querySelector("[data-pc-desc]");
+
+    function pickObra(key) {
+      const list = COLORS[key].obras;
+      return list[Math.floor(Math.random() * list.length)];
+    }
+
+    function selectColor(key, seg) {
+      const data = COLORS[key];
+      if (!data) return;
+      const obra = pickObra(key);
+      wheel.classList.add("has-selection");
+      segs.forEach((s) => {
+        const active = s === seg;
+        s.classList.toggle("is-active", active);
+        s.setAttribute("aria-pressed", String(active));
+      });
+      if (center) center.textContent = data.name;
+      if (empty) empty.style.display = "none";
+
+      // crossfade de imagen + ficha
+      img.style.opacity = "0";
+      if (info) info.classList.remove("is-shown");
+      setTimeout(() => {
+        img.onload = () => { img.style.opacity = "1"; };
+        img.onerror = () => { img.style.opacity = "0"; };
+        img.src = encodeURI(`img/por color/${data.dir}/${obra.file}`);
+        img.alt = obra.titulo ? `${obra.titulo}${obra.autor ? ", " + obra.autor : ""}` : `Obra en color ${data.name.toLowerCase()}`;
+        if (info) {
+          elAnio.textContent = obra.anio || "";
+          elAutor.textContent = obra.autor || "";
+          elTitulo.textContent = obra.titulo || "";
+          elDesc.textContent = obra.desc || "";
+          info.hidden = false;
+          info.classList.add("is-shown");
+        }
+      }, 150);
+    }
+
+    segs.forEach((seg) => {
+      const key = seg.dataset.color;
+      seg.addEventListener("click", () => selectColor(key, seg));
+      seg.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectColor(key, seg); }
+      });
+    });
+
+    registerOverlay(overlay, "[data-porcolor-open]");
+  }
+
+  /* ---------- Aprendé por autor (overlay: índice alfabético + ficha) ----------
+     Datos en AUTORES (ficha completa) + INDICE (agrupación por letra). Agregar un
+     artista = sumarlo a AUTORES y referenciar su id en INDICE. Imágenes opcionales
+     en img/por-autor/<imagen> (si falta, el retrato simplemente no se muestra). */
+  function initAuthorExplorer() {
+    const overlay = document.querySelector("[data-porautor]");
+    if (!overlay) return;
+
+    const AUTORES = {
+"sandro-botticelli": { 
+        nombre: "Sandro Botticelli", 
+        nacimiento: "1445", 
+        fallecimiento: "1510", 
+        nacionalidad: "Italiano", 
+        imagen: "sandro-botticelli.jpg", 
+        biografia: [
+            "Pintor del Renacimiento florentino, célebre por El nacimiento de Venus y La primavera.", 
+            "Su estilo se distingue por la elegancia de la línea, la gracia de las figuras y los temas mitológicos.",
+            "Gozó del importante mecenazgo de la familia Médici, lo que le permitió insertarse en los círculos intelectuales y humanistas más destacados de la Florencia del Quattrocento.",
+            "Hacia el final de su vida, profundamente afectado por las predicaciones apocalípticas del monje Girolamo Savonarola, su pintura adoptó un tono más severo y místico, y terminó sus días sumido en la pobreza y el olvido hasta ser redescubierto en el siglo XIX."
+        ] 
+      },
+      "louise-bourgeois": { 
+        nombre: "Louise Bourgeois", 
+        nacimiento: "1911", 
+        fallecimiento: "2010", 
+        nacionalidad: "Francesa-estadounidense", 
+        imagen: "louise-bourgeois.jpg", 
+        biografia: [
+            "Escultora y artista plástica conocida por sus arañas monumentales (Maman).", 
+            "Su obra explora la memoria, el cuerpo, la maternidad y la infancia con gran carga emocional.",
+            "Profundamente marcada por los traumas de su niñez, en especial por las infidelidades de su padre y la enfermedad de su madre, Bourgeois utilizó el arte como una herramienta de purga psicológica y psicoanálisis visual.",
+            "A lo largo de su extensa carrera experimentó con una amplia variedad de materiales, incluyendo madera, bronce, látex y tejidos, logrando el reconocimiento internacional masivo recién en las últimas décadas de su vida."
+        ] 
+      },
+      "jean-michel-basquiat": { 
+        nombre: "Jean-Michel Basquiat", 
+        nacimiento: "1960", 
+        fallecimiento: "1988", 
+        nacionalidad: "Estadounidense", 
+        imagen: "jean-michel-basquiat.jpg", 
+        biografia: [
+            "Figura del neoexpresionismo surgido del arte urbano de Nueva York.", 
+            "Su pintura combina texto, símbolos y crítica social con una energía cruda e inmediata.",
+            "Comenzó su carrera artística en la década de 1970 bajo el seudónimo SAMO, llenando las calles del Lower East Side de Manhattan con grafitis de mensajes poéticos y subversivos.",
+            "Tras entablar una intensa amistad y colaboración con Andy Warhol, alcanzó el éxito comercial internacional en tiempo récord, abordando en sus lienzos temas como el racismo, la desigualdad y la historia afroamericana, antes de su trágica muerte por sobredosis a los 27 años."
+        ] 
+      },
+      "william-blake": { 
+        nombre: "William Blake", 
+        nacimiento: "1757", 
+        fallecimiento: "1827", 
+        nacionalidad: "Inglés", 
+        imagen: "william-blake.jpg", 
+        biografia: [
+            "Poeta, pintor y grabador, figura visionaria del Romanticismo.", 
+            "Integró imagen y palabra en obras de fuerte carga simbólica y espiritual.",
+            "Rechazó la religión ortodoxa y la racionalidad de la Ilustración, creando en su lugar una compleja mitología propia poblada de seres divinos y demoníacos que plasmó en sus famosos 'libros iluminados'.",
+            "Considerado un loco e incomprendido por sus contemporáneos, vivió gran parte de su vida en la pobreza, pero su genio fue reivindicado por generaciones posteriores que lo reconocieron como un pilar fundamental del arte y la literatura inglesa."
+        ] 
+      },
+      "caravaggio": { 
+        nombre: "Caravaggio", 
+        nacimiento: "1571", 
+        fallecimiento: "1610", 
+        nacionalidad: "Italiano", 
+        imagen: "caravaggio.jpg", 
+        biografia: [
+            "Maestro del Barroco que revolucionó la pintura con el claroscuro y el tenebrismo.", 
+            "Llevó un realismo intenso y dramático a las escenas religiosas.",
+            "Desafió las convenciones estéticas de su tiempo al utilizar a prostitutas, mendigos y gente de los bajos fondos romanos como modelos para representar a santos y figuras bíblicas, lo que le valió tantos encargos prestigiosos como severos rechazos por parte de la Iglesia.",
+            "Su vida personal fue tan turbulenta como sus lienzos, marcada por peleas, problemas legales y un asesinato que lo obligó a vivir sus últimos años huyendo de la justicia entre Nápoles, Malta y Sicilia."
+        ] 
+      },
+      "paul-cezanne": { 
+        nombre: "Paul Cézanne", 
+        nacimiento: "1839", 
+        fallecimiento: "1906", 
+        nacionalidad: "Francés", 
+        imagen: "paul-cezanne.jpg", 
+        biografia: [
+            "Pintor postimpresionista que buscó la estructura y la forma esencial de las cosas.", 
+            "Su trabajo abrió el camino al cubismo y al arte moderno.",
+            "Insatisfecho con la fugacidad del impresionismo, Cézanne se propuso 'hacer del impresionismo algo sólido y duradero como el arte de los museos', analizando la naturaleza a través de formas geométricas básicas como el cilindro, la esfera y el cono.",
+            "Aislado en su Provenza natal, trabajó obsesivamente en naturalezas muertas, bañistas y los paisajes de la montaña Sainte-Victoire, sentando las bases visuales que inspirarían profundamente a Picasso y Georges Braque."
+        ] 
+      },
+      "camille-claudel": { 
+        nombre: "Camille Claudel", 
+        nacimiento: "1864", 
+        fallecimiento: "1943", 
+        nacionalidad: "Francesa", 
+        imagen: "camille-claudel.jpg", 
+        biografia: [
+            "Escultora de gran fuerza expresiva, conocida por obras como La valse.", 
+            "Desarrolló un lenguaje propio dentro de la escultura de su época.",
+            "Su talento la llevó a trabajar en el taller de Auguste Rodin, con quien mantuvo una apasionada, productiva y finalmente destructiva relación artística y sentimental que eclipsó temporalmente su propio genio individual.",
+            "Tras su ruptura con Rodin, logró crear piezas de una sensibilidad e innovación asombrosas en mármol y bronce, pero los problemas económicos y el deterioro de su salud mental la llevaron a pasar los últimos 30 años de su vida recluida contra su voluntad en un hospital psiquiátrico."
+        ] 
+      },
+      "canaletto": { 
+        nombre: "Canaletto", 
+        nacimiento: "1697", 
+        fallecimiento: "1768", 
+        nacionalidad: "Italiano", 
+        imagen: "canaletto.jpg", 
+        biografia: [
+            "Pintor veneciano célebre por sus vistas urbanas (vedute) de Venecia.", 
+            "Sus paisajes destacan por la precisión arquitectónica y el manejo de la luz.",
+            "Sus detalladas pinturas eran sumamente populares entre los aristócratas británicos que realizaban el 'Grand Tour' europeo, quienes las compraban como suntuosos recuerdos de sus viajes por Italia.",
+            "Para lograr la exactitud milimétrica de sus perspectivas, Canaletto a menudo se ayudaba de la cámara oscura, técnica que luego llevó a Inglaterra, donde residió varios años pintando los paisajes londinenses y las residencias de sus acaudalados clientes."
+        ] 
+      },
+      "salvador-dali": { 
+        nombre: "Salvador Dalí", 
+        nacimiento: "1904", 
+        fallecimiento: "1989", 
+        nacionalidad: "Español", 
+        imagen: "salvador-dali.jpg", 
+        biografia: [
+            "Fue un pintor, escultor y escritor, reconocido como una de las figuras más destacadas del surrealismo.", 
+            "Su obra se caracterizó por imágenes oníricas, escenas fantásticas y una técnica detallada que desafiaba la lógica y la realidad, inspirada por los sueños, el subconsciente y las teorías del psicoanálisis de Sigmund Freud.",
+            "A través de su método 'paranoico-crítico', creó composiciones icónicas llenas de simbolismos como relojes derretidos, elefantes de patas alargadas y huevos, siendo 'La persistencia de la memoria' y 'El gran masturbador' algunas de sus piezas más veneradas.",
+            "Su genio artístico iba acompañado de una personalidad excéntrica y narcisista que lo convirtió en un maestro del marketing de sí mismo. Junto a su musa y esposa Gala, construyó un universo mediático sin precedentes, consolidándose como uno de los artistas más influyentes, polémicos y singulares del siglo XX."
+        ] 
+      },
+      "edgar-degas": { 
+        nombre: "Edgar Degas", 
+        nacimiento: "1834", 
+        fallecimiento: "1917", 
+        nacionalidad: "Francés", 
+        imagen: "edgar-degas.jpg", 
+        biografia: [
+            "Asociado al impresionismo, retrató el movimiento y la vida moderna.", 
+            "Es célebre por sus bailarinas, trabajadas en pintura, pastel y escultura.",
+            "A diferencia de otros impresionistas que preferían pintar al aire libre (plein air), Degas se definía como un realista que componía meticulosamente sus escenas en el estudio, obsesionado con la luz artificial y los ángulos inusuales influenciados por la fotografía y las estampas japonesas.",
+            "En sus últimos años, a medida que su visión se deterioraba drásticamente, abandonó el óleo para enfocarse casi exclusivamente en el pastel y la escultura en cera, volviéndose un hombre solitario y misántropo vagando por las calles de París."
+        ] 
+      },
+      "honore-daumier": { 
+        nombre: "Honoré Daumier", 
+        nacimiento: "1808", 
+        fallecimiento: "1879", 
+        nacionalidad: "Francés", 
+        imagen: "honore-daumier.jpg", 
+        biografia: [
+            "Pintor, grabador y caricaturista de gran agudeza.", 
+            "Su obra retrató con sentido crítico la sociedad y la política de su tiempo.",
+            "A través de miles de litografías publicadas en revistas satíricas, Daumier expuso la hipocresía de la burguesía, la corrupción de los abogados y los excesos de la monarquía, lo que incluso le costó varios meses de prisión tras caricaturizar al rey Luis Felipe I como el gigante Gargantúa.",
+            "Aunque en su época fue valorado casi exclusivamente por su talento humorístico, sus magistrales óleos y acuarelas sobre las clases trabajadoras, como 'El vagón de tercera clase', lo consagraron póstumamente como un pionero del realismo pictórico."
+        ] 
+      },
+      "leonardo-da-vinci": { 
+        nombre: "Leonardo da Vinci", 
+        nacimiento: "1452", 
+        fallecimiento: "1519", 
+        nacionalidad: "Italiano", 
+        imagen: "leonardo-da-vinci.jpg", 
+        biografia: [
+            "Pintor, científico e inventor del Alto Renacimiento.", 
+            "Autor de La Gioconda y La última cena, es símbolo del genio universal.",
+            "Su insaciable curiosidad lo llevó a llenar miles de páginas de cuadernos (códices) con estudios detallados de anatomía, botánica, óptica e ingeniería, diseñando máquinas voladoras, armas y obras hidráulicas siglos antes de que pudieran construirse.",
+            "En la pintura, perfeccionó la técnica del 'sfumato', difuminando los contornos para crear una sensación de volumen y atmósfera envolvente, aunque su afán perfeccionista y experimental hizo que muchas de sus obras quedaran inacabadas o sufrieran un rápido deterioro técnico."
+        ] 
+      },
+      "albrecht-durer": { 
+        nombre: "Albrecht Dürer", 
+        nacimiento: "1471", 
+        fallecimiento: "1528", 
+        nacionalidad: "Alemán", 
+        imagen: "albrecht-durer.jpg", 
+        biografia: [
+            "Pintor y grabador del Renacimiento.", 
+            "Renovó el grabado europeo y unió la tradición nórdica con los ideales italianos.",
+            "Tras viajar a Venecia y estudiar el arte y la teoría matemática del Renacimiento italiano, Durero integró la perspectiva científica y el canon de proporciones humanas al intenso detallismo y la expresividad del arte gótico alemán.",
+            "Sus magistrales grabados en madera y cobre, como 'Melancolía I' y 'El caballero, la muerte y el diablo', circularon por toda Europa, convirtiéndolo en el primer artista nórdico en lograr un impacto y reconocimiento genuinamente internacionales durante su vida."
+        ] 
+      },
+      "alberto-giacometti": { 
+        nombre: "Alberto Giacometti", 
+        nacimiento: "1901", 
+        fallecimiento: "1966", 
+        nacionalidad: "Suizo", 
+        imagen: "alberto-giacometti.jpg", 
+        biografia: [
+            "Escultor y pintor del siglo XX.", 
+            "Sus figuras humanas extremadamente alargadas y frágiles son íconos del arte moderno.",
+            "En sus inicios estuvo vinculado al movimiento surrealista en París, explorando temas del inconsciente y el trauma, pero en la década de 1940 se volcó a la observación directa del modelo vivo, buscando capturar la esencia fenoménica de la realidad.",
+            "Sus emblemáticas esculturas filiformes, con texturas rasgadas y proporciones demacradas, fueron aclamadas por filósofos como Jean-Paul Sartre, quienes vieron en ellas la perfecta encarnación visual de la angustia y el aislamiento del existencialismo de posguerra."
+        ] 
+      },
+      "amedeo-modigliani": { 
+        nombre: "Amedeo Modigliani", 
+        nacimiento: "1884", 
+        fallecimiento: "1920", 
+        nacionalidad: "Italiano", 
+        imagen: "amedeo-modigliani.jpg", 
+        biografia: [
+            "Pintor y escultor reconocido por sus retratos y desnudos.", 
+            "Su estilo se distingue por los cuellos alargados y los rostros estilizados.",
+            "Establecido en el barrio parisino de Montparnasse, desarrolló una estética única que fusionaba la elegancia del arte renacentista sienés con el primitivismo de las máscaras africanas y la estatuaria cicládica.",
+            "Su vida bohemia estuvo plagada de excesos, pobreza extrema y mala salud por la tuberculosis. Su trágica muerte a los 35 años, seguida del suicidio de su compañera Jeanne Hébuterne, cimentó el mito del 'artista maldito', mientras sus cuadros alcanzaban cotizaciones astronómicas años después."
+        ] 
+      },
+
+      /* --- A --- */
+      "giuseppe-arcimboldo": { nombre: "Giuseppe Arcimboldo", nacimiento: "1526", fallecimiento: "1593", nacionalidad: "Italiano", imagen: "giuseppe-arcimboldo.jpg", biografia: ["Pintor manierista célebre por sus retratos compuestos con frutas, flores y objetos."] },
+      "sofonisba-anguissola": { nombre: "Sofonisba Anguissola", nacimiento: "1532", fallecimiento: "1625", nacionalidad: "Italiana", imagen: "sofonisba-anguissola.jpg", biografia: ["Retratista del Renacimiento, pionera entre las mujeres artistas de su tiempo."] },
+      "josef-albers": { nombre: "Josef Albers", nacimiento: "1888", fallecimiento: "1976", nacionalidad: "Alemán-estadounidense", imagen: "josef-albers.jpg", biografia: ["Artista y docente de la Bauhaus, conocido por la serie Homenaje al cuadrado."] },
+
+      /* --- E --- */
+      "m-c-escher": { nombre: "M. C. Escher", nacimiento: "1898", fallecimiento: "1972", nacionalidad: "Neerlandés", imagen: "m-c-escher.jpg", biografia: ["Grabador célebre por sus construcciones imposibles, teselados y juegos de perspectiva."] },
+      "max-ernst": { nombre: "Max Ernst", nacimiento: "1891", fallecimiento: "1976", nacionalidad: "Alemán", imagen: "max-ernst.jpg", biografia: ["Figura del dadaísmo y el surrealismo; experimentó con el frottage y el collage."] },
+      "james-ensor": { nombre: "James Ensor", nacimiento: "1860", fallecimiento: "1949", nacionalidad: "Belga", imagen: "james-ensor.jpg", biografia: ["Precursor del expresionismo, reconocido por sus máscaras y escenas grotescas."] },
+
+      /* --- F --- */
+      "lucian-freud": { nombre: "Lucian Freud", nacimiento: "1922", fallecimiento: "2011", nacionalidad: "Británico", imagen: "lucian-freud.jpg", biografia: ["Pintor figurativo célebre por sus retratos y desnudos de intensa carnalidad."] },
+      "caspar-david-friedrich": { nombre: "Caspar David Friedrich", nacimiento: "1774", fallecimiento: "1840", nacionalidad: "Alemán", imagen: "caspar-david-friedrich.jpg", biografia: ["Máximo paisajista del Romanticismo, de atmósferas contemplativas y sublimes."] },
+      "lucio-fontana": { nombre: "Lucio Fontana", nacimiento: "1899", fallecimiento: "1968", nacionalidad: "Argentino-italiano", imagen: "lucio-fontana.jpg", biografia: ["Creador del espacialismo, conocido por sus lienzos perforados y cortados."] },
+      "helen-frankenthaler": { nombre: "Helen Frankenthaler", nacimiento: "1928", fallecimiento: "2011", nacionalidad: "Estadounidense", imagen: "helen-frankenthaler.jpg", biografia: ["Pintora del color field, pionera de la técnica de empapado del lienzo (soak-stain)."] },
+
+      /* --- H --- */
+      "katsushika-hokusai": { nombre: "Katsushika Hokusai", nacimiento: "1760", fallecimiento: "1849", nacionalidad: "Japonés", imagen: "katsushika-hokusai.jpg", biografia: ["Maestro del ukiyo-e, autor de La gran ola de Kanagawa."] },
+      "david-hockney": { nombre: "David Hockney", nacimiento: "1937", fallecimiento: "", nacionalidad: "Británico", imagen: "david-hockney.jpg", biografia: ["Figura clave del pop británico, célebre por sus piscinas y paisajes luminosos."] },
+      "keith-haring": { nombre: "Keith Haring", nacimiento: "1958", fallecimiento: "1990", nacionalidad: "Estadounidense", imagen: "keith-haring.jpg", biografia: ["Artista del arte urbano de Nueva York, de figuras sintéticas y activismo social."] },
+      "hans-holbein": { nombre: "Hans Holbein el Joven", nacimiento: "1497", fallecimiento: "1543", nacionalidad: "Alemán", imagen: "hans-holbein.jpg", biografia: ["Retratista del Renacimiento, célebre por su precisión y los retratos de la corte Tudor."] },
+
+      /* --- I --- */
+      "jean-auguste-dominique-ingres": { nombre: "Jean-Auguste-Dominique Ingres", nacimiento: "1780", fallecimiento: "1867", nacionalidad: "Francés", imagen: "jean-auguste-dominique-ingres.jpg", biografia: ["Maestro del neoclasicismo, de dibujo impecable y sensualidad de la línea."] },
+      "robert-indiana": { nombre: "Robert Indiana", nacimiento: "1928", fallecimiento: "2018", nacionalidad: "Estadounidense", imagen: "robert-indiana.jpg", biografia: ["Artista del pop art, conocido por su icónica escultura LOVE."] },
+
+      /* --- J --- */
+      "jasper-johns": { nombre: "Jasper Johns", nacimiento: "1930", fallecimiento: "", nacionalidad: "Estadounidense", imagen: "jasper-johns.jpg", biografia: ["Precursor del pop y el minimalismo, célebre por sus banderas y dianas."] },
+      "donald-judd": { nombre: "Donald Judd", nacimiento: "1928", fallecimiento: "1994", nacionalidad: "Estadounidense", imagen: "donald-judd.jpg", biografia: ["Referente del minimalismo, conocido por sus objetos específicos y módulos seriados."] },
+
+      /* --- K --- */
+      "frida-kahlo": { nombre: "Frida Kahlo", nacimiento: "1907", fallecimiento: "1954", nacionalidad: "Mexicana", imagen: "frida-kahlo.jpg", biografia: ["Pintora célebre por sus autorretratos cargados de simbolismo y dolor personal."] },
+      "wassily-kandinsky": { nombre: "Wassily Kandinsky", nacimiento: "1866", fallecimiento: "1944", nacionalidad: "Ruso", imagen: "wassily-kandinsky.jpg", biografia: ["Pionero de la abstracción, relacionó color y forma con la música y lo espiritual."] },
+      "gustav-klimt": { nombre: "Gustav Klimt", nacimiento: "1862", fallecimiento: "1918", nacionalidad: "Austríaco", imagen: "gustav-klimt.jpg", biografia: ["Figura del modernismo vienés, autor de El beso y de superficies doradas ornamentales."] },
+      "paul-klee": { nombre: "Paul Klee", nacimiento: "1879", fallecimiento: "1940", nacionalidad: "Suizo-alemán", imagen: "paul-klee.jpg", biografia: ["Artista de la Bauhaus, de un lenguaje poético entre la abstracción y el signo."] },
+
+      /* --- L --- */
+      "roy-lichtenstein": { nombre: "Roy Lichtenstein", nacimiento: "1923", fallecimiento: "1997", nacionalidad: "Estadounidense", imagen: "roy-lichtenstein.jpg", biografia: ["Referente del pop art, conocido por sus obras inspiradas en el cómic y los puntos Ben-Day."] },
+      "fernand-leger": { nombre: "Fernand Léger", nacimiento: "1881", fallecimiento: "1955", nacionalidad: "Francés", imagen: "fernand-leger.jpg", biografia: ["Pintor del cubismo, de formas tubulares y una estética ligada a la era de la máquina."] },
+
+      /* --- N --- */
+      "niki-de-saint-phalle": { nombre: "Niki de Saint Phalle", nacimiento: "1930", fallecimiento: "2002", nacionalidad: "Francesa-estadounidense", imagen: "niki-de-saint-phalle.jpg", biografia: ["Escultora célebre por sus Nanas, figuras femeninas monumentales y coloridas."] },
+      "isamu-noguchi": { nombre: "Isamu Noguchi", nacimiento: "1904", fallecimiento: "1988", nacionalidad: "Estadounidense-japonés", imagen: "isamu-noguchi.jpg", biografia: ["Escultor y diseñador que unió la escultura moderna con el diseño y el paisaje."] },
+      "barnett-newman": { nombre: "Barnett Newman", nacimiento: "1905", fallecimiento: "1970", nacionalidad: "Estadounidense", imagen: "barnett-newman.jpg", biografia: ["Figura del expresionismo abstracto, conocido por sus campos de color y sus zips."] },
+
+      /* --- O --- */
+      "georgia-okeeffe": { nombre: "Georgia O'Keeffe", nacimiento: "1887", fallecimiento: "1986", nacionalidad: "Estadounidense", imagen: "georgia-okeeffe.jpg", biografia: ["Madre del modernismo estadounidense, célebre por sus flores y paisajes del suroeste."] },
+      "odilon-redon": { nombre: "Odilon Redon", nacimiento: "1840", fallecimiento: "1916", nacionalidad: "Francés", imagen: "odilon-redon.jpg", biografia: ["Pintor simbolista de un mundo onírico, entre el negro del carbón y el color floral."] },
+      "oswaldo-guayasamin": { nombre: "Oswaldo Guayasamín", nacimiento: "1919", fallecimiento: "1999", nacionalidad: "Ecuatoriano", imagen: "oswaldo-guayasamin.jpg", biografia: ["Pintor expresionista, su obra denuncia el sufrimiento y la injusticia en América Latina."] },
+
+      /* --- P --- */
+      "pablo-picasso": { nombre: "Pablo Picasso", nacimiento: "1881", fallecimiento: "1973", nacionalidad: "Español", imagen: "pablo-picasso.jpg", biografia: ["Cofundador del cubismo y figura central del arte del siglo XX, autor del Guernica."] },
+      "piero-della-francesca": { nombre: "Piero della Francesca", nacimiento: "1415", fallecimiento: "1492", nacionalidad: "Italiano", imagen: "piero-della-francesca.jpg", biografia: ["Pintor del Renacimiento, maestro de la perspectiva y la composición serena."] },
+      "jackson-pollock": { nombre: "Jackson Pollock", nacimiento: "1912", fallecimiento: "1956", nacionalidad: "Estadounidense", imagen: "jackson-pollock.jpg", biografia: ["Referente del expresionismo abstracto, célebre por su técnica de goteo (dripping)."] },
+      "camille-pissarro": { nombre: "Camille Pissarro", nacimiento: "1830", fallecimiento: "1903", nacionalidad: "Francés", imagen: "camille-pissarro.jpg", biografia: ["Figura fundamental del impresionismo, pintor de paisajes rurales y urbanos."] },
+
+      /* --- Q --- */
+      "qi-baishi": { nombre: "Qi Baishi", nacimiento: "1864", fallecimiento: "1957", nacionalidad: "Chino", imagen: "qi-baishi.jpg", biografia: ["Maestro de la pintura tradicional china, célebre por sus motivos de la naturaleza."] },
+      "quinten-massys": { nombre: "Quinten Massys", nacimiento: "1466", fallecimiento: "1530", nacionalidad: "Flamenco", imagen: "quinten-massys.jpg", biografia: ["Pintor del Renacimiento nórdico, de retratos minuciosos y escenas de género."] },
+
+      /* --- R --- */
+      "rembrandt": { nombre: "Rembrandt", nacimiento: "1606", fallecimiento: "1669", nacionalidad: "Neerlandés", imagen: "rembrandt.jpg", biografia: ["Genio del Barroco, maestro del claroscuro, el retrato y el autorretrato."] },
+      "pierre-auguste-renoir": { nombre: "Pierre-Auguste Renoir", nacimiento: "1841", fallecimiento: "1919", nacionalidad: "Francés", imagen: "pierre-auguste-renoir.jpg", biografia: ["Impresionista célebre por sus escenas luminosas de la vida y el retrato."] },
+      "auguste-rodin": { nombre: "Auguste Rodin", nacimiento: "1840", fallecimiento: "1917", nacionalidad: "Francés", imagen: "auguste-rodin.jpg", biografia: ["Padre de la escultura moderna, autor de El pensador y Los burgueses de Calais."] },
+      "raphael": { nombre: "Raphael (Rafael Sanzio)", nacimiento: "1483", fallecimiento: "1520", nacionalidad: "Italiano", imagen: "raphael.jpg", biografia: ["Maestro del Alto Renacimiento, célebre por la armonía y claridad de sus composiciones."] },
+
+      /* --- S --- */
+      "egon-schiele": { nombre: "Egon Schiele", nacimiento: "1890", fallecimiento: "1918", nacionalidad: "Austríaco", imagen: "egon-schiele.jpg", biografia: ["Expresionista de línea angulosa e intensa, célebre por sus retratos y desnudos."] },
+      "georges-seurat": { nombre: "Georges Seurat", nacimiento: "1859", fallecimiento: "1891", nacionalidad: "Francés", imagen: "georges-seurat.jpg", biografia: ["Creador del puntillismo, construyó la imagen con pequeños puntos de color puro."] },
+      "jenny-saville": { nombre: "Jenny Saville", nacimiento: "1970", fallecimiento: "", nacionalidad: "Británica", imagen: "jenny-saville.jpg", biografia: ["Pintora contemporánea de figuración monumental centrada en el cuerpo."] },
+      "david-smith": { nombre: "David Smith", nacimiento: "1906", fallecimiento: "1965", nacionalidad: "Estadounidense", imagen: "david-smith.jpg", biografia: ["Escultor pionero de la obra en acero soldado, ligado al expresionismo abstracto."] },
+      "joaquin-sorolla": { nombre: "Joaquín Sorolla", nacimiento: "1863", fallecimiento: "1923", nacionalidad: "Español", imagen: "joaquin-sorolla.jpg", biografia: ["Maestro del luminismo, célebre por sus playas mediterráneas bañadas de sol."] },
+
+      /* --- T --- */
+      "henri-de-toulouse-lautrec": { nombre: "Henri de Toulouse-Lautrec", nacimiento: "1864", fallecimiento: "1901", nacionalidad: "Francés", imagen: "henri-de-toulouse-lautrec.jpg", biografia: ["Postimpresionista que retrató la vida nocturna del París de la Belle Époque."] },
+      "titian": { nombre: "Titian (Tiziano)", nacimiento: "1488", fallecimiento: "1576", nacionalidad: "Italiano", imagen: "titian.jpg", biografia: ["Maestro del Renacimiento veneciano, de un color rico y una pincelada libre."] },
+      "antoni-tapies": { nombre: "Antoni Tàpies", nacimiento: "1923", fallecimiento: "2012", nacionalidad: "Español", imagen: "antoni-tapies.jpg", biografia: ["Referente del informalismo, trabajó la materia, el muro y el signo."] },
+      "tintoretto": { nombre: "Tintoretto", nacimiento: "1518", fallecimiento: "1594", nacionalidad: "Italiano", imagen: "tintoretto.jpg", biografia: ["Pintor del manierismo veneciano, de composiciones dinámicas y luz dramática."] },
+
+      /* --- U --- */
+      "paolo-uccello": { nombre: "Paolo Uccello", nacimiento: "1397", fallecimiento: "1475", nacionalidad: "Italiano", imagen: "paolo-uccello.jpg", biografia: ["Pintor del Renacimiento temprano, obsesionado con la perspectiva geométrica."] },
+      "utagawa-hiroshige": { nombre: "Utagawa Hiroshige", nacimiento: "1797", fallecimiento: "1858", nacionalidad: "Japonés", imagen: "utagawa-hiroshige.jpg", biografia: ["Maestro del ukiyo-e, célebre por sus series de paisajes y estampas de viaje."] },
+
+      /* --- V --- */
+      "vincent-van-gogh": { nombre: "Vincent van Gogh", nacimiento: "1853", fallecimiento: "1890", nacionalidad: "Neerlandés", imagen: "vincent-van-gogh.jpg", biografia: ["Postimpresionista de pincelada vibrante y color intenso, autor de La noche estrellada."] },
+      "diego-velazquez": { nombre: "Diego Velázquez", nacimiento: "1599", fallecimiento: "1660", nacionalidad: "Español", imagen: "diego-velazquez.jpg", biografia: ["Maestro del Barroco español, autor de Las meninas, referente del retrato de corte."] },
+      "victor-vasarely": { nombre: "Victor Vasarely", nacimiento: "1906", fallecimiento: "1997", nacionalidad: "Húngaro-francés", imagen: "victor-vasarely.jpg", biografia: ["Padre del op art, exploró la ilusión óptica con patrones geométricos."] },
+      "johannes-vermeer": { nombre: "Johannes Vermeer", nacimiento: "1632", fallecimiento: "1675", nacionalidad: "Neerlandés", imagen: "johannes-vermeer.jpg", biografia: ["Maestro del Barroco neerlandés, célebre por su luz y por La joven de la perla."] },
+
+      /* --- W --- */
+      "andy-warhol": { nombre: "Andy Warhol", nacimiento: "1928", fallecimiento: "1987", nacionalidad: "Estadounidense", imagen: "andy-warhol.jpg", biografia: ["Figura central del pop art, célebre por sus serigrafías de la cultura de masas."] },
+      "james-mcneill-whistler": { nombre: "James McNeill Whistler", nacimiento: "1834", fallecimiento: "1903", nacionalidad: "Estadounidense", imagen: "james-mcneill-whistler.jpg", biografia: ["Pintor tonalista, defensor del 'arte por el arte' y la armonía cromática."] },
+      "franz-xaver-winterhalter": { nombre: "Franz Xaver Winterhalter", nacimiento: "1805", fallecimiento: "1873", nacionalidad: "Alemán", imagen: "franz-xaver-winterhalter.jpg", biografia: ["Retratista de la realeza y la aristocracia europea del siglo XIX."] },
+
+      /* --- X --- */
+      "xu-beihong": { nombre: "Xu Beihong", nacimiento: "1895", fallecimiento: "1953", nacionalidad: "Chino", imagen: "xu-beihong.jpg", biografia: ["Pintor que fusionó la tinta tradicional china con la técnica occidental; célebre por sus caballos."] },
+      "xia-gui": { nombre: "Xia Gui", nacimiento: "1195", fallecimiento: "1224", nacionalidad: "Chino", imagen: "xia-gui.jpg", biografia: ["Pintor de paisaje de la dinastía Song del Sur, maestro del espacio y el vacío."] },
+
+      /* --- Y --- */
+      "yayoi-kusama": { nombre: "Yayoi Kusama", nacimiento: "1929", fallecimiento: "", nacionalidad: "Japonesa", imagen: "yayoi-kusama.jpg", biografia: ["Artista contemporánea célebre por sus lunares y sus Infinity Mirror Rooms."] },
+      "yun-fei-ji": { nombre: "Yun-Fei Ji", nacimiento: "1963", fallecimiento: "", nacionalidad: "Chino-estadounidense", imagen: "yun-fei-ji.jpg", biografia: ["Artista contemporáneo que actualiza la pintura de tinta china con temas sociales."] },
+
+      /* --- Z --- */
+      "francisco-de-zurbaran": { nombre: "Francisco de Zurbarán", nacimiento: "1598", fallecimiento: "1664", nacionalidad: "Español", imagen: "francisco-de-zurbaran.jpg", biografia: ["Pintor del Barroco español, de intensos claroscuros y temática religiosa."] },
+      "zhang-daqian": { nombre: "Zhang Daqian", nacimiento: "1899", fallecimiento: "1983", nacionalidad: "Chino", imagen: "zhang-daqian.jpg", biografia: ["Maestro de la pintura china del siglo XX, célebre por su técnica de tinta salpicada."] },
+      "zao-wou-ki": { nombre: "Zao Wou-Ki", nacimiento: "1920", fallecimiento: "2008", nacionalidad: "Chino-francés", imagen: "zao-wou-ki.jpg", biografia: ["Pintor de la abstracción lírica que unió la tradición china con la modernidad europea."] },
+    };
+
+    // Índice A–Z. Algunas letras quedan sin artistas por ahora y simplemente no se
+    // muestran. Agregar uno: sumarlo a AUTORES y referenciar su id en la letra.
+    const INDICE = [
+      { letra: "A", autores: ["giuseppe-arcimboldo", "sofonisba-anguissola", "josef-albers"] },
+      { letra: "B", autores: ["sandro-botticelli", "louise-bourgeois", "jean-michel-basquiat", "william-blake"] },
+      { letra: "C", autores: ["caravaggio", "paul-cezanne", "camille-claudel", "canaletto"] },
+      { letra: "D", autores: ["salvador-dali", "edgar-degas", "honore-daumier", "leonardo-da-vinci", "albrecht-durer"] },
+      { letra: "E", autores: ["m-c-escher", "max-ernst", "james-ensor"] },
+      { letra: "F", autores: ["lucian-freud", "caspar-david-friedrich", "lucio-fontana", "helen-frankenthaler"] },
+      { letra: "G", autores: ["alberto-giacometti"] },
+      { letra: "H", autores: ["katsushika-hokusai", "david-hockney", "keith-haring", "hans-holbein"] },
+      { letra: "I", autores: ["jean-auguste-dominique-ingres", "robert-indiana"] },
+      { letra: "J", autores: ["jasper-johns", "donald-judd"] },
+      { letra: "K", autores: ["frida-kahlo", "wassily-kandinsky", "gustav-klimt", "paul-klee"] },
+      { letra: "L", autores: ["roy-lichtenstein", "fernand-leger"] },
+      { letra: "M", autores: ["amedeo-modigliani"] },
+      { letra: "N", autores: ["niki-de-saint-phalle", "isamu-noguchi", "barnett-newman"] },
+      { letra: "O", autores: ["georgia-okeeffe", "odilon-redon", "oswaldo-guayasamin"] },
+      { letra: "P", autores: ["pablo-picasso", "piero-della-francesca", "jackson-pollock", "camille-pissarro"] },
+      { letra: "Q", autores: ["qi-baishi", "quinten-massys"] },
+      { letra: "R", autores: ["rembrandt", "pierre-auguste-renoir", "auguste-rodin", "raphael"] },
+      { letra: "S", autores: ["egon-schiele", "georges-seurat", "jenny-saville", "david-smith", "joaquin-sorolla"] },
+      { letra: "T", autores: ["henri-de-toulouse-lautrec", "titian", "antoni-tapies", "tintoretto"] },
+      { letra: "U", autores: ["paolo-uccello", "utagawa-hiroshige"] },
+      { letra: "V", autores: ["vincent-van-gogh", "diego-velazquez", "victor-vasarely", "johannes-vermeer"] },
+      { letra: "W", autores: ["andy-warhol", "james-mcneill-whistler", "franz-xaver-winterhalter"] },
+      { letra: "X", autores: ["xu-beihong", "xia-gui"] },
+      { letra: "Y", autores: ["yayoi-kusama", "yun-fei-ji"] },
+      { letra: "Z", autores: ["francisco-de-zurbaran", "zhang-daqian", "zao-wou-ki"] },
+    ];
+
+    const indexEl = overlay.querySelector("[data-porautor-index]");
+    const ficha = overlay.querySelector("[data-porautor-ficha]");
+    const fa = {
+      dates: overlay.querySelector("[data-fa-dates]"),
+      nac: overlay.querySelector("[data-fa-nac]"),
+      name: overlay.querySelector("[data-fa-name]"),
+      bio: overlay.querySelector("[data-fa-bio]"),
+      img: overlay.querySelector("[data-fa-img]"),
+    };
+
+    // construir el índice alfabético (solo letras con artistas)
+    INDICE.forEach((grupo) => {
+      const col = document.createElement("div");
+      col.className = "porautor__letter-col";
+      const letra = document.createElement("p");
+      letra.className = "porautor__letter";
+      letra.textContent = grupo.letra;
+      const list = document.createElement("ul");
+      list.className = "porautor__list";
+      grupo.autores.forEach((id) => {
+        const a = AUTORES[id];
+        if (!a) return;
+        const li = document.createElement("li");
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "porautor__author";
+        btn.dataset.author = id;
+        btn.textContent = a.nombre;
+        btn.addEventListener("click", () => showAuthor(id));
+        li.appendChild(btn);
+        list.appendChild(li);
+      });
+      col.appendChild(letra);
+      col.appendChild(list);
+      indexEl.appendChild(col);
+    });
+
+    function showAuthor(id) {
+      const a = AUTORES[id];
+      if (!a) return;
+      indexEl.querySelectorAll(".porautor__author").forEach((b) => {
+        const on = b.dataset.author === id;
+        b.classList.toggle("is-active", on);
+        b.setAttribute("aria-current", on ? "true" : "false");
+      });
+      ficha.classList.add("is-swapping");
+      setTimeout(() => {
+        fa.dates.textContent = a.fallecimiento ? `${a.nacimiento} – ${a.fallecimiento}` : `n. ${a.nacimiento}`;
+        fa.nac.textContent = a.nacionalidad;
+        fa.name.textContent = a.nombre;
+        fa.bio.innerHTML = a.biografia.map((p) => `<p class="text-body">${p}</p>`).join("");
+        if (a.imagen) {
+          fa.img.style.opacity = "0";
+          fa.img.onload = () => { fa.img.style.opacity = "1"; };
+          fa.img.onerror = () => { fa.img.style.opacity = "0"; };
+          fa.img.src = encodeURI(`img/por-autor/${a.imagen}`);
+          fa.img.alt = `Retrato de ${a.nombre}`;
+        } else {
+          fa.img.removeAttribute("src"); fa.img.style.opacity = "0"; fa.img.alt = "";
+        }
+        ficha.classList.remove("is-swapping");
+      }, 150);
+    }
+
+    // carrusel del índice: flechas para desplazar la fila + estado activado/desactivado
+    const prevBtn = overlay.querySelector("[data-porautor-prev]");
+    const nextBtn = overlay.querySelector("[data-porautor-next]");
+    function updateArrows() {
+      const max = indexEl.scrollWidth - indexEl.clientWidth;
+      if (prevBtn) prevBtn.disabled = indexEl.scrollLeft <= 1;
+      if (nextBtn) nextBtn.disabled = indexEl.scrollLeft >= max - 1;
+    }
+    function nudge(dir) {
+      indexEl.scrollBy({ left: dir * Math.max(indexEl.clientWidth * 0.8, 220), behavior: "smooth" });
+    }
+    prevBtn && prevBtn.addEventListener("click", () => nudge(-1));
+    nextBtn && nextBtn.addEventListener("click", () => nudge(1));
+    indexEl.addEventListener("scroll", updateArrows, { passive: true });
+    window.addEventListener("resize", debounce(updateArrows, 150));
+    updateArrows();
+
+    showAuthor("salvador-dali"); // ficha por defecto al abrir
+    registerOverlay(overlay, "[data-porautor-open]");
   }
 })();

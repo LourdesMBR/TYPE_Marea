@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Asap:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="styles.css?v=14">
+<link rel="stylesheet" href="styles.css?v=21">
 </head>
 <!-- fx-photo-duotone: duotono magenta sobre fotos de arte (removible: borrá esa clase) -->
 <body class="is-loading fx-photo-duotone">
@@ -567,31 +567,121 @@
       <h2 class="text-h1">Aprendé</h2>
     </div>
 
-    <div class="aprende-grid">
+    <div class="container aprende-grid">
       <div class="aprende-band aprende-band--lime aprende-band--desc">
-        <div class="aprende-band__head">
-          <span class="aprende-band__label">Por autor</span>
-          <a class="link-cta" href="#">Ver más<svg aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+        <div class="aprende-band__head"  style="border-top-left-radius: 20px!important;">
+          <span class="aprende-band__label" data-porautor-open role="button" tabindex="0" aria-label="Abrir Aprendé por autor">Por autor</span>
+          <a class="link-cta" href="#por-autor" data-porautor-open>Ver más<svg aria-hidden="true"><use href="#icon-arrow"/></svg></a>
         </div>
-        <div class="aprende-band__shelf"></div>
+        <div class="aprende-band__shelf"  style="border-top-right-radius: 20px!important; "></div>
       </div>
 
-
-      <div class="aprende-band aprende-band--magenta aprende-band--asc" style="background-color: #cef564 !important;">
+<div class="" style="background-color: #cef564 !important;">
+      <div class="aprende-band aprende-band--magenta aprende-band--asc" >
         <div class="aprende-band__shelf"></div>
-        <div class="aprende-band__head">
-          <span class="aprende-band__label">Por color</span>
-          <a class="link-cta" href="#">Ver más<svg aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+        <div class="aprende-band__head" style="border-top-right-radius: 20px!important;" >
+          <span class="aprende-band__label" data-porcolor-open role="button" tabindex="0" aria-label="Abrir Aprendé por color">Por color</span>
+          <a class="link-cta" href="#por-color" data-porcolor-open>Ver más<svg aria-hidden="true"><use href="#icon-arrow"/></svg></a>
         </div>
       </div>
-      <div class="aprende-band aprende-band--black aprende-band--desc" style="background-color: rgb(241, 55, 166) !important;">
-        <div class="aprende-band__head">
+</div>
+
+<div style="background-color: var(--color-magenta) !important; border-bottom-right-radius: 20px!important; border-bottom-left-radius: 20px!important;">
+
+      <div class="aprende-band aprende-band--black aprende-band--desc" >
+        <div class="aprende-band__head"  style="border-bottom-left-radius: 20px!important;border-top-left-radius: 20px!important;">
           <span class="aprende-band__label">Por año</span>
           <a class="link-cta" href="#">Ver más<svg aria-hidden="true"><use href="#icon-arrow"/></svg></a>
         </div>
-        <div class="aprende-band__shelf"></div>
+        <div class="aprende-band__shelf" style="border-bottom-right-radius: 20px!important;"></div>
+</div>
+
+    </div>
+  </section>
+
+  <!-- Sub-sección: Aprendé por color (overlay; se abre desde la banda "Por color") -->
+  <section class="porcolor" id="por-color" data-porcolor aria-label="Aprendé por color" aria-hidden="true">
+    <div class="container porcolor__inner">
+      <button type="button" class="porcolor__close" data-overlay-close aria-label="Cerrar">
+        <svg aria-hidden="true"><use href="#icon-close"/></svg>
+      </button>
+
+      <h2 class="text-h1 porcolor__title">Aprendé por color</h2>
+
+      <div class="porcolor__grid">
+        <div class="porcolor__wheel-col">
+          <div class="colorwheel" data-colorwheel role="group" aria-label="Rueda cromática: elegí un color">
+            <svg class="colorwheel__svg" viewBox="0 0 200 200">
+              <circle class="colorwheel__hole" cx="100" cy="100" r="57" fill="var(--color-white)" stroke="rgba(0,0,0,0.18)" stroke-width="0.8"/>
+              <!-- aro de color: gira lento de forma continua (ver .colorwheel__ring) -->
+              <g class="colorwheel__ring">
+                <circle class="colorwheel__seg" data-color="rosa"     role="button" tabindex="0" aria-pressed="false" aria-label="Rosa"     cx="100" cy="100" r="76" fill="none" stroke="#F137A5" stroke-dasharray="73.6 403.9" style="--rot:-90deg"/>
+                <circle class="colorwheel__seg" data-color="rojo"     role="button" tabindex="0" aria-pressed="false" aria-label="Rojo"     cx="100" cy="100" r="76" fill="none" stroke="#FF2E2E" stroke-dasharray="73.6 403.9" style="--rot:-30deg"/>
+                <circle class="colorwheel__seg" data-color="amarillo" role="button" tabindex="0" aria-pressed="false" aria-label="Amarillo" cx="100" cy="100" r="76" fill="none" stroke="#FFD400" stroke-dasharray="73.6 403.9" style="--rot:30deg"/>
+                <circle class="colorwheel__seg" data-color="verde"    role="button" tabindex="0" aria-pressed="false" aria-label="Verde"    cx="100" cy="100" r="76" fill="none" stroke="#46C24A" stroke-dasharray="73.6 403.9" style="--rot:90deg"/>
+                <circle class="colorwheel__seg" data-color="azul"     role="button" tabindex="0" aria-pressed="false" aria-label="Azul"     cx="100" cy="100" r="76" fill="none" stroke="#2B4FF5" stroke-dasharray="73.6 403.9" style="--rot:150deg"/>
+                <circle class="colorwheel__seg" data-color="marron"   role="button" tabindex="0" aria-pressed="false" aria-label="Marrón"   cx="100" cy="100" r="76" fill="none" stroke="#8A5A2C" stroke-dasharray="73.6 403.9" style="--rot:210deg"/>
+              </g>
+            </svg>
+            <div class="colorwheel__center">
+              <p class="colorwheel__hint" data-porcolor-center>Seleccioná<br>un color</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="porcolor__art" data-porcolor-art>
+          <img class="porcolor__img" data-porcolor-img src="" alt="" decoding="async">
+          <p class="porcolor__art-empty" data-porcolor-empty>Elegí un color para descubrir una obra</p>
+        </div>
+
+        <div class="porcolor__info" data-porcolor-info hidden>
+          <p class="porcolor__obra-meta">
+            <span class="porcolor__obra-year" data-pc-anio></span>
+            <span class="porcolor__obra-author" data-pc-autor></span>
+          </p>
+          <h3 class="porcolor__obra-title" data-pc-titulo></h3>
+          <p class="porcolor__obra-desc text-body" data-pc-desc></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sub-sección: Aprendé por autor (overlay; se abre desde la banda "Por autor").
+       El índice y la ficha los completa JS desde el objeto de datos (initAuthorExplorer). -->
+  <section class="porautor" id="por-autor" data-porautor aria-label="Aprendé por autor" aria-hidden="true">
+    <div class="container porautor__inner">
+      <button type="button" class="porcolor__close" data-overlay-close aria-label="Cerrar">
+        <svg aria-hidden="true"><use href="#icon-close"/></svg>
+      </button>
+
+      <h2 class="text-h1 porautor__title">Aprendé por autor</h2>
+      <p class="eyebrow porautor__index-label">Índice</p>
+
+      <div class="porautor__index-wrap">
+        <button type="button" class="porautor__arrow" data-porautor-prev aria-label="Letras anteriores">
+          <svg aria-hidden="true"><use href="#icon-chevron-left"/></svg>
+        </button>
+        <div class="porautor__index" data-porautor-index></div>
+        <button type="button" class="porautor__arrow" data-porautor-next aria-label="Más letras">
+          <svg aria-hidden="true"><use href="#icon-chevron-right"/></svg>
+        </button>
       </div>
 
+      <hr class="porautor__divider">
+
+      <div class="porautor__ficha" data-porautor-ficha>
+        <div class="porautor__head">
+          <p class="porautor__meta">
+            <span data-fa-dates></span>
+            <span data-fa-nac></span>
+          </p>
+          <h4 class="porautor__name" data-fa-name></h4>
+        </div>
+        <div class="porautor__bio" data-fa-bio></div>
+        <div class="porautor__portrait">
+          <img data-fa-img src="" alt="" decoding="async">
+        </div>
+      </div>
     </div>
   </section>
 
@@ -655,6 +745,6 @@
   </div>
 </footer>
 
-<script src="script.js?v=14" defer></script>
+<script src="script.js?v=21" defer></script>
 </body>
 </html>
