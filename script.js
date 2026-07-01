@@ -44,6 +44,7 @@
     initCursor();
     initColorExplorer();
     initAuthorExplorer();
+    initYearExplorer();
     initOverlayGlobals();
 
     window.addEventListener("resize", debounce(() => {
@@ -460,7 +461,16 @@
 
   /* ---------- Cursor personalizado: circle-follow nativo (sin GSAP) ---------- */
   let cursor = null;
-  const CURSOR_TARGETS = "a, button, .cta, .btn";
+  // el círculo se agranda SOLO sobre texto — no sobre botones, links ni imágenes.
+  const CURSOR_TEXT = "p, h1, h2, h3, h4, h5, h6, li, blockquote, figcaption, em, strong, [class*='text-'], .eyebrow";
+  const CURSOR_BTN = "a, button, .btn, .cta, .link-cta, [role='button']";
+  const CURSOR_NOGROW = "a, button, input, textarea, label, img, picture, svg, .btn, .cta, .link-cta, [role='button']";
+  function isTextTarget(el) {
+    return !!(el && el.closest && el.closest(CURSOR_TEXT) && !el.closest(CURSOR_NOGROW));
+  }
+  function isButtonTarget(el) {
+    return !!(el && el.closest && el.closest(CURSOR_BTN));
+  }
   // sobre fotos el cursor usa una lente duotono (no inversión); el resto del
   // tiempo es un solo círculo blanco con mix-blend-mode:difference, que invierte
   // el fondo (texto legible sobre cualquier superficie). Ver CSS .cursor__base.
@@ -490,22 +500,29 @@
         root.classList.add("is-visible");
       }
     }
-    // sobre fotos → lente duotono (is-photo); en cualquier otra superficie el
-    // círculo de inversión basta (sin clases extra).
-    function applyTint(el) {
-      root.classList.toggle("is-photo", isPhotoTarget(el));
+    // estado del cursor según lo que tiene debajo:
+    //   foto   → lente duotono (is-photo)
+    //   botón  → sin inversión + leve agrandado (is-plain)
+    //   texto  → agrandado mayor, manteniendo la inversión por defecto (is-hovering)
+    //   resto  → círculo de inversión normal
+    function applyState(el) {
+      const photo = isPhotoTarget(el);
+      const button = !photo && isButtonTarget(el);
+      const text = !photo && !button && isTextTarget(el);
+      root.classList.toggle("is-photo", photo);
+      root.classList.toggle("is-plain", button);
+      root.classList.toggle("is-hovering", text);
+      s.targetScale = text ? 1.5 : button ? 1.25 : 1;
     }
     function onLeave() {
       s.visible = false;
-      root.classList.remove("is-visible", "is-photo");
+      root.classList.remove("is-visible", "is-photo", "is-plain", "is-hovering");
+      s.targetScale = 1;
     }
     function onOver(e) {
-      if (e.target.closest?.(CURSOR_TARGETS)) { root.classList.add("is-hovering"); s.targetScale = 1.5; }
-      applyTint(e.target); // recomputa la lente al entrar a cada elemento
+      applyState(e.target); // recomputa el estado al entrar a cada elemento
     }
-    function onOut(e) {
-      if (!e.relatedTarget?.closest?.(CURSOR_TARGETS)) { root.classList.remove("is-hovering"); s.targetScale = 1; }
-    }
+    function onOut() {}
 
     // loop: la bola sigue al mouse con retardo (lerp) y el escalado en hover se
     // anima en el mismo transform (sin transition CSS, que laggearía el seguimiento)
@@ -1137,5 +1154,212 @@
 
     showAuthor("salvador-dali"); // ficha por defecto al abrir
     registerOverlay(overlay, "[data-porautor-open]");
+  }
+
+  /* ---------- Aprendé por año (overlay: línea de tiempo editorial) ----------
+     38 artistas ordenados por año de nacimiento (lista provista, no se agregan
+     otros). Desktop/tablet: scroll horizontal nativo (rueda/trackpad/drag) con
+     eventos alternados arriba/abajo de un eje central. Mobile: columna vertical.
+     Imagen opcional en img/por-anio/<slug>.jpg — si falta, la miniatura no se
+     muestra (no rompe el layout). Agregar un artista: sumar un objeto al array
+     TIMELINE respetando el orden cronológico. */
+  function initYearExplorer() {
+    const overlay = document.querySelector("[data-porano]");
+    if (!overlay) return;
+
+    const TIMELINE = [
+      { year: 1401, nombre: "Masaccio", movimiento: "Renacimiento temprano", slug: "masaccio", desc: "Introdujo la perspectiva científica y dio volumen real a las figuras.", detalle: "Su capilla Brancacci marcó un antes y un después para generaciones de pintores florentinos." },
+      { year: 1452, nombre: "Leonardo da Vinci", movimiento: "Alto Renacimiento", slug: "leonardo-da-vinci", desc: "Unió arte y ciencia con una curiosidad sin límites.", detalle: "La Gioconda y La última cena siguen siendo dos de las imágenes más estudiadas de la historia." },
+      { year: 1475, nombre: "Miguel Ángel", movimiento: "Alto Renacimiento", slug: "miguel-angel", desc: "Escultor y pintor; el cuerpo humano como ideal absoluto.", detalle: "Sus frescos en la Capilla Sixtina redefinieron la escala y la ambición del arte religioso." },
+      { year: 1483, nombre: "Rafael", movimiento: "Alto Renacimiento", slug: "rafael", desc: "Maestro de la armonía, la claridad y la composición equilibrada.", detalle: "La escuela de Atenas condensa el ideal clásico del Renacimiento en una sola pared." },
+      { year: 1571, nombre: "Caravaggio", movimiento: "Barroco", slug: "caravaggio", desc: "Revolucionó la pintura con el claroscuro y el realismo crudo.", detalle: "Su vida turbulenta y su pintura violenta cambiaron para siempre la forma de narrar lo sagrado." },
+      { year: 1599, nombre: "Diego Velázquez", movimiento: "Barroco español", slug: "diego-velazquez", desc: "Retratista de corte; la luz y la verdad por encima del decoro.", detalle: "Las meninas sigue siendo uno de los enigmas compositivos más comentados del arte occidental." },
+      { year: 1770, nombre: "Caspar David Friedrich", movimiento: "Romanticismo", slug: "caspar-david-friedrich", desc: "Paisajes sublimes que hacen del silencio una experiencia.", detalle: "El caminante sobre el mar de nubes resume su idea del ser humano frente a lo inmenso." },
+      { year: 1775, nombre: "J. M. W. Turner", movimiento: "Romanticismo", slug: "jmw-turner", desc: "Disolvió la forma en luz, color y atmósfera.", detalle: "Sus últimas obras, casi abstractas, anticiparon el impresionismo décadas antes de que existiera." },
+      { year: 1798, nombre: "Eugène Delacroix", movimiento: "Romanticismo", slug: "eugene-delacroix", desc: "Color, movimiento y pasión frente al rigor neoclásico.", detalle: "La libertad guiando al pueblo convirtió la pintura en un manifiesto político." },
+      { year: 1819, nombre: "Gustave Courbet", movimiento: "Realismo", slug: "gustave-courbet", desc: "Pintó la vida cotidiana sin idealizarla.", detalle: "Se negó a pintar ángeles porque, decía, nunca había visto uno." },
+      { year: 1830, nombre: "Camille Pissarro", movimiento: "Impresionismo", slug: "camille-pissarro", desc: "El más constante de los impresionistas; maestro de sus pares.", detalle: "Fue mentor de Cézanne, Gauguin y Seurat, entre muchos otros." },
+      { year: 1832, nombre: "Édouard Manet", movimiento: "Impresionismo (bisagra)", slug: "edouard-manet", desc: "El puente entre el realismo y la modernidad pictórica.", detalle: "Su almuerzo sobre la hierba escandalizó al Salón oficial de París en 1863." },
+      { year: 1834, nombre: "Edgar Degas", movimiento: "Impresionismo", slug: "edgar-degas", desc: "El movimiento capturado: bailarinas, carreras, instantes.", detalle: "Prefería definirse como realista antes que como impresionista." },
+      { year: 1840, nombre: "Claude Monet", movimiento: "Impresionismo", slug: "claude-monet", desc: "La luz como tema; el instante como método.", detalle: "Su serie de los nenúfares en Giverny ocupó las últimas tres décadas de su vida." },
+      { year: 1841, nombre: "Pierre-Auguste Renoir", movimiento: "Impresionismo", slug: "pierre-auguste-renoir", desc: "Celebró el placer, el color cálido y la vida social.", detalle: "Sus escenas de baile y sociabilidad retratan la vida moderna parisina." },
+      { year: 1848, nombre: "Paul Gauguin", movimiento: "Postimpresionismo", slug: "paul-gauguin", desc: "Buscó lo primitivo y el color simbólico lejos de Europa.", detalle: "Sus años en Tahití produjeron algunas de las imágenes más discutidas del arte moderno." },
+      { year: 1853, nombre: "Vincent van Gogh", movimiento: "Postimpresionismo", slug: "vincent-van-gogh", desc: "Pincelada vibrante y color intenso como lenguaje emocional.", detalle: "Pintó más de dos mil obras en apenas una década de actividad." },
+      { year: 1859, nombre: "Georges Seurat", movimiento: "Puntillismo", slug: "georges-seurat", desc: "Construyó la imagen punto a punto, con rigor científico.", detalle: "Una tarde de domingo en la Grande Jatte le tomó más de dos años completarla." },
+      { year: 1862, nombre: "Gustav Klimt", movimiento: "Modernismo vienés", slug: "gustav-klimt", desc: "Ornamento dorado y erotismo simbolista.", detalle: "El beso combina pintura, mosaico bizantino y hoja de oro en una sola superficie." },
+      { year: 1863, nombre: "Edvard Munch", movimiento: "Expresionismo", slug: "edvard-munch", desc: "La angustia existencial hecha imagen.", detalle: "El grito existe en varias versiones; ninguna agota su intensidad." },
+      { year: 1869, nombre: "Henri Matisse", movimiento: "Fauvismo", slug: "henri-matisse", desc: "El color liberado de la descripción; alegría pura.", detalle: "En sus últimos años, ya sin poder pintar, creó obras maestras solo con tijera y papel." },
+      { year: 1881, nombre: "Pablo Picasso", movimiento: "Cubismo", slug: "pablo-picasso", desc: "Descompuso la forma y reinventó la pintura del siglo XX.", detalle: "Guernica condensó el horror de la guerra en una sola pared monumental." },
+      { year: 1883, nombre: "Kazimir Malevich", movimiento: "Suprematismo", slug: "kazimir-malevich", desc: "Redujo la pintura a la forma pura: el cuadrado negro.", detalle: "Cuadrado negro sobre fondo blanco buscaba llegar al 'grado cero' de la pintura." },
+      { year: 1887, nombre: "Marcel Duchamp", movimiento: "Dadaísmo / conceptual", slug: "marcel-duchamp", desc: "El objeto cotidiano como pregunta sobre qué es el arte.", detalle: "Su urinario titulado Fuente sigue siendo la obra más provocadora del siglo XX." },
+      { year: 1890, nombre: "Joan Miró", movimiento: "Surrealismo", slug: "joan-miro", desc: "Un lenguaje propio de signos, biomorfismo y color.", detalle: "Decía que quería asesinar la pintura tal como se la conocía hasta entonces." },
+      { year: 1892, nombre: "Georgia O'Keeffe", movimiento: "Modernismo estadounidense", slug: "georgia-okeeffe", desc: "Flores y paisajes llevados a una escala monumental.", detalle: "Vivió gran parte de su vida en Nuevo México, entre huesos, flores y desierto." },
+      { year: 1898, nombre: "René Magritte", movimiento: "Surrealismo", slug: "rene-magritte", desc: "Imágenes lógicas que esconden preguntas imposibles.", detalle: "Esto no es una pipa desafía la relación entre las palabras, las imágenes y las cosas." },
+      { year: 1904, nombre: "Salvador Dalí", movimiento: "Surrealismo", slug: "salvador-dali", desc: "Lo onírico llevado a una técnica obsesivamente precisa.", detalle: "La persistencia de la memoria convirtió los relojes blandos en un ícono universal." },
+      { year: 1912, nombre: "Jackson Pollock", movimiento: "Expresionismo abstracto", slug: "jackson-pollock", desc: "El gesto y el goteo como forma de pintar sin tocar el lienzo.", detalle: "Pintaba en el piso, caminando alrededor del lienzo en vez de frente a él." },
+      { year: 1923, nombre: "Roy Lichtenstein", movimiento: "Pop art", slug: "roy-lichtenstein", desc: "El cómic elevado a la escala y el estatus del arte.", detalle: "Ampliaba viñetas de cómic hasta volverlas monumentales pinturas de galería." },
+      { year: 1928, nombre: "Andy Warhol", movimiento: "Pop art", slug: "andy-warhol", desc: "La cultura de masas repetida hasta volverse ícono.", detalle: "Sus latas de sopa Campbell's preguntan qué separa el arte del producto." },
+      { year: 1930, nombre: "Jasper Johns", movimiento: "Pop / neodadaísmo", slug: "jasper-johns", desc: "Banderas y dianas: lo familiar vuelto extraño.", detalle: "Pintaba banderas estadounidenses con una técnica antigua, la encáustica." },
+      { year: 1935, nombre: "David Hockney", movimiento: "Pop / contemporáneo", slug: "david-hockney", desc: "Piscinas, luz de California y una mirada siempre curiosa.", detalle: "En sus últimos años adoptó el iPad como herramienta habitual de dibujo." },
+      { year: 1938, nombre: "Yayoi Kusama", movimiento: "Arte contemporáneo", slug: "yayoi-kusama", desc: "Lunares e infinito como obsesión y refugio.", detalle: "Sus Infinity Rooms convirtieron la repetición y el espejo en experiencia inmersiva." },
+      { year: 1941, nombre: "Anselm Kiefer", movimiento: "Neoexpresionismo", slug: "anselm-kiefer", desc: "Historia, memoria y materia bruta a gran escala.", detalle: "Trabaja con plomo, ceniza y paja para abordar la historia alemana del siglo XX." },
+      { year: 1955, nombre: "Jean-Michel Basquiat", movimiento: "Neoexpresionismo / arte urbano", slug: "jean-michel-basquiat", desc: "Texto, símbolo y crítica social con energía cruda.", detalle: "Pasó de pintar grafitis en las calles de Nueva York a exhibir junto a Warhol." },
+      { year: 1960, nombre: "Damien Hirst", movimiento: "Arte conceptual (YBA)", slug: "damien-hirst", desc: "La muerte, la ciencia y el shock como material artístico.", detalle: "Un tiburón en formol, titulado La imposibilidad física de la muerte, lo hizo célebre." },
+      { year: 1965, nombre: "Banksy", movimiento: "Arte urbano", slug: "banksy", desc: "Anonimato, ironía y crítica en la calle.", detalle: "Su identidad real sigue sin confirmarse oficialmente hasta el día de hoy." },
+    ];
+
+    const scroller = overlay.querySelector("[data-porano-scroll]");
+    const track = overlay.querySelector("[data-porano-track]");
+    if (!scroller || !track) return;
+
+    // eje central: línea base + relleno magenta (el relleno se dibuja con el scroll)
+    const spine = document.createElement("div");
+    spine.className = "porano__spine";
+    const spineFill = document.createElement("div");
+    spineFill.className = "porano__spine-fill";
+    spine.appendChild(spineFill);
+    track.appendChild(spine);
+
+    const events = TIMELINE.map((item, i) => {
+      const li = document.createElement("li");
+      li.className = "porano__event";
+      li.dataset.index = String(i);
+
+      const content = document.createElement("div");
+      content.className = "porano__content";
+      content.innerHTML = `
+        <p class="porano__year">${item.year}</p>
+        <div class="porano__thumb-wrap">
+          <img class="porano__thumb" src="${encodeURI(`img/por-anio/${item.slug}.jpg`)}" alt="${item.nombre}" loading="lazy" decoding="async">
+        </div>
+        <h3 class="porano__name">${item.nombre}</h3>
+        <p class="porano__movement">${item.movimiento}</p>
+        <p class="porano__desc">${item.desc}</p>
+      `;
+      // si la miniatura no existe todavía (se agrega más adelante), no dejar el
+      // hueco de una imagen rota: se oculta el wrapper entero
+      const thumb = content.querySelector(".porano__thumb");
+      const thumbWrap = content.querySelector(".porano__thumb-wrap");
+      thumb.addEventListener("error", () => { thumbWrap.style.display = "none"; }, { once: true });
+
+      // alternancia arriba/abajo (solo tiene efecto visual en desktop/tablet vía CSS)
+      const padUp = document.createElement("div");
+      padUp.className = "porano__pad-up";
+      const padDown = document.createElement("div");
+      padDown.className = "porano__pad-down";
+      if (i % 2 === 0) padDown.appendChild(content); else padUp.appendChild(content);
+
+      const dot = document.createElement("span");
+      dot.className = "porano__dot";
+      dot.setAttribute("aria-hidden", "true");
+
+      li.append(padUp, dot, padDown);
+      track.appendChild(li);
+
+      return li;
+    });
+
+    // ---- revelado progresivo (IntersectionObserver) + año/punto activo ----
+    // el root cambia según el layout: en desktop/tablet los eventos scrollean
+    // dentro de .porano__scroller; en mobile el scroll es el del overlay entero.
+    const mqMobile = matchMedia("(max-width: 900px)");
+    let io = null;
+    function buildObserver() {
+      if (io) io.disconnect();
+      const root = mqMobile.matches ? overlay : scroller;
+      io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) entry.target.classList.add("is-visible");
+        });
+      }, { root, threshold: 0.35 });
+      events.forEach((el) => io.observe(el));
+    }
+    buildObserver();
+    mqMobile.addEventListener("change", buildObserver);
+
+    // año activo = el evento más cercano al centro del área visible + progreso
+    // de scroll aplicado al relleno de la línea (--p), en el eje que corresponda
+    let ticking = false;
+    function updateActiveAndProgress() {
+      ticking = false;
+      const mobile = mqMobile.matches;
+      const box = mobile ? overlay.getBoundingClientRect() : scroller.getBoundingClientRect();
+      const centerAxis = mobile ? box.top + box.height / 2 : box.left + box.width / 2;
+
+      let closest = null, closestDist = Infinity;
+      events.forEach((el) => {
+        const r = el.getBoundingClientRect();
+        const c = mobile ? r.top + r.height / 2 : r.left + r.width / 2;
+        const d = Math.abs(c - centerAxis);
+        if (d < closestDist) { closestDist = d; closest = el; }
+        el.classList.remove("is-current");
+      });
+      if (closest) closest.classList.add("is-current");
+
+      // progreso 0–1 a lo largo del recorrido total
+      let progress = 0;
+      if (mobile) {
+        const total = track.scrollHeight - overlay.clientHeight * 0.5;
+        progress = total > 0 ? clamp((overlay.scrollTop - (track.offsetTop - overlay.clientHeight * 0.5)) / total, 0, 1) : 0;
+      } else {
+        const max = scroller.scrollWidth - scroller.clientWidth;
+        progress = max > 0 ? clamp(scroller.scrollLeft / max, 0, 1) : 0;
+      }
+      spineFill.style.setProperty("--p", progress.toFixed(4));
+    }
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(updateActiveAndProgress);
+    }
+    scroller.addEventListener("scroll", onScroll, { passive: true });
+    overlay.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", debounce(updateActiveAndProgress, 150));
+
+    // rueda vertical → desplazamiento horizontal (desktop/tablet); en mobile
+    // .porano__scroller no tiene overflow-x, así que esto no tiene efecto
+    scroller.addEventListener("wheel", (e) => {
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        scroller.scrollLeft += e.deltaY;
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    // arrastre con mouse (mismo patrón que el deck de Creá)
+    let drag = null;
+    scroller.addEventListener("pointerdown", (e) => {
+      if (e.pointerType !== "mouse" || mqMobile.matches) return;
+      drag = { startX: e.clientX, startScroll: scroller.scrollLeft };
+      scroller.classList.add("is-dragging");
+      scroller.setPointerCapture(e.pointerId);
+    });
+    scroller.addEventListener("pointermove", (e) => {
+      if (!drag) return;
+      scroller.scrollLeft = drag.startScroll - (e.clientX - drag.startX);
+    });
+    const stopDrag = () => { drag = null; scroller.classList.remove("is-dragging"); };
+    scroller.addEventListener("pointerup", stopDrag);
+    scroller.addEventListener("pointercancel", stopDrag);
+
+    // flechas prev/next: otra forma intuitiva de mover la línea además del
+    // arrastre y la rueda; se deshabilitan solas en cada extremo del recorrido
+    const prevBtn = overlay.querySelector("[data-porano-prev]");
+    const nextBtn = overlay.querySelector("[data-porano-next]");
+    function updateArrows() {
+      const max = scroller.scrollWidth - scroller.clientWidth;
+      if (prevBtn) prevBtn.disabled = scroller.scrollLeft <= 1;
+      if (nextBtn) nextBtn.disabled = scroller.scrollLeft >= max - 1;
+    }
+    function nudge(dir) {
+      scroller.scrollBy({ left: dir * scroller.clientWidth * 0.7, behavior: "smooth" });
+    }
+    prevBtn && prevBtn.addEventListener("click", () => nudge(-1));
+    nextBtn && nextBtn.addEventListener("click", () => nudge(1));
+    scroller.addEventListener("scroll", updateArrows, { passive: true });
+    window.addEventListener("resize", debounce(updateArrows, 150));
+    updateArrows();
+
+    updateActiveAndProgress();
+    registerOverlay(overlay, "[data-porano-open]");
   }
 })();

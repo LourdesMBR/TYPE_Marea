@@ -976,17 +976,17 @@ body:not(.is-loading) .hero__title-line--bold .word {
    container y grilla de la landing. z-index por DEBAJO del header para que el nav
    sticky siga visible; el contenido deja un espacio superior (--header-h) para no
    quedar tapado por él. */
-.porcolor, .porautor {
+.porcolor, .porautor, .porano {
   position: fixed; inset: 0; z-index: calc(var(--z-header) - 1);
   background: var(--color-white); color: var(--color-black);
   overflow-y: auto;
   opacity: 0; visibility: hidden;
   transition: opacity var(--dur-base) var(--ease-out), visibility var(--dur-base);
 }
-.porcolor.is-open, .porautor.is-open { opacity: 1; visibility: visible; }
+.porcolor.is-open, .porautor.is-open, .porano.is-open { opacity: 1; visibility: visible; }
 body.overlay-open { overflow: hidden; }
 
-.porcolor__inner, .porautor__inner {
+.porcolor__inner, .porautor__inner, .porano__inner {
   position: relative; min-height: 100vh;
   display: flex; flex-direction: column;
   padding-top: calc(var(--header-h) + var(--space-7));
@@ -1124,15 +1124,15 @@ body.overlay-open { overflow: hidden; }
 .porautor__index::-webkit-scrollbar { display: none; }
 .porautor__letter-col { flex: 0 0 clamp(150px, 16vw, 185px); scroll-snap-align: start; }
 
-.porautor__arrow {
+.porautor__arrow, .porano__arrow {
   flex: 0 0 auto;
   width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center;
   border: 1.5px solid var(--color-black); border-radius: var(--radius-pill); background: var(--color-white);
   transition: background-color var(--dur-fast), color var(--dur-fast), opacity var(--dur-fast);
 }
-.porautor__arrow:hover { background: var(--color-black); color: var(--color-white); }
-.porautor__arrow svg { width: 20px; height: 20px; }
-.porautor__arrow[disabled] { opacity: 0.25; pointer-events: none; }
+.porautor__arrow:hover, .porano__arrow:hover { background: var(--color-black); color: var(--color-white); }
+.porautor__arrow svg, .porano__arrow svg { width: 20px; height: 20px; }
+.porautor__arrow[disabled], .porano__arrow[disabled] { opacity: 0.25; pointer-events: none; }
 
 .porautor__letter { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-h3); margin-bottom: var(--space-3); }
 .porautor__list { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); }
@@ -1176,6 +1176,170 @@ body.overlay-open { overflow: hidden; }
     gap: var(--space-6);
   }
   .porautor__name { font-size: var(--fs-h1); }
+}
+
+/* ---------- 11d. APRENDÉ POR AÑO (overlay: línea de tiempo editorial) ----------
+   Experiencia deliberadamente distinta al resto del sitio: tipografía como
+   protagonista, fotos pequeñas en B/N, magenta como único acento interactivo
+   (punto activo, año activo, línea de progreso, hover). Desktop/tablet: línea
+   horizontal de scroll nativo (rueda/trackpad/drag), eventos alternados arriba/
+   abajo de un eje central. Mobile: columna vertical, sin alternancia, scroll de
+   página normal. Estructura de grilla: .porano__track usa una sola fila (grid,
+   auto-columnas) con align-items:stretch — cada .porano__event se estira a la
+   altura máxima de la fila y reparte esa altura en dos mitades iguales
+   (.porano__pad-up / --down, flex:1 cada una) con el punto en el medio; así el
+   punto queda siempre a la misma altura sin importar cuánto texto tenga cada
+   evento, sin cálculos en JS. */
+
+/* alineado a la izquierda de la grilla: .container centra por defecto (margin-
+   inline:auto), acá lo anulamos para que el bloque arranque en el borde igual
+   que el resto de los encabezados de sección del sitio (03./04. Aprendé, etc.) */
+.porano__head { max-width: 62ch; margin-inline: 0; }
+.porano__eyebrow { color: var(--color-magenta); }
+.porano__title { margin-block: var(--space-3) var(--space-5); }
+.porano__intro { opacity: 0.75; }
+
+/* entrada del encabezado: se dispara con .is-open (no con scroll, ya que el
+   overlay recién se hace visible al abrirse) */
+.porano__head > * {
+  opacity: 0; transform: translateY(18px);
+  transition: opacity var(--dur-slow) var(--ease-out), transform var(--dur-slow) var(--ease-out);
+}
+.porano.is-open .porano__head > * { opacity: 1; transform: none; }
+.porano__head > *:nth-child(1) { transition-delay: 0ms; }
+.porano__head > *:nth-child(2) { transition-delay: 80ms; }
+.porano__head > *:nth-child(3) { transition-delay: 160ms; }
+
+.porano__timeline { margin-top: var(--space-9); flex: 1; }
+/* flechas a los costados del scroller: forma alternativa e intuitiva de mover
+   la línea de tiempo, además del arrastre con mouse y la rueda/trackpad */
+.porano__nav-wrap { display: flex; align-items: center; gap: var(--space-4); }
+.porano__nav-wrap .porano__arrow { margin-inline: var(--space-2); }
+
+.porano__scroller {
+  /* overflow-y NO se recorta (visible): si una ficha se expande y crece más que
+     el alto reservado, se ve igual — el overlay entero ya scrollea vertical */
+  overflow-x: auto; overflow-y: visible;
+  scrollbar-width: none; -ms-overflow-style: none;
+  cursor: grab;
+}
+.porano__scroller::-webkit-scrollbar { display: none; }
+.porano__scroller.is-dragging { cursor: grabbing; scroll-snap-type: none; }
+.porano__scroller:focus-visible { outline: 2px solid var(--color-turquoise); outline-offset: -2px; }
+
+.porano__track {
+  position: relative;
+  display: grid; grid-auto-flow: column;
+  grid-auto-columns: clamp(220px, 19vw, 280px);
+  column-gap: var(--space-8);
+  width: max-content;
+  padding-inline: var(--container-padding-x);
+  padding-block: var(--space-9);
+}
+/* eje central: una línea fina de base + un relleno magenta que "se dibuja" según
+   el progreso de scroll (lo actualiza JS vía --p en el propio elemento) */
+.porano__spine {
+  position: absolute; left: var(--container-padding-x); right: var(--container-padding-x); top: 50%;
+  height: 1.5px; background: rgba(0, 0, 0, 0.15); transform: translateY(-50%);
+  pointer-events: none;
+}
+.porano__spine-fill {
+  position: absolute; inset: 0; background: var(--color-magenta);
+  transform: scaleX(var(--p, 0)); transform-origin: left center;
+}
+
+/* el punto debe quedar a la MISMA altura en todos los eventos, sin importar
+   cuánto texto tenga cada uno. En vez de repartir el alto con flex-grow (que
+   respeta el mínimo de contenido y desalinea el punto cuando un lado tiene más
+   texto que el otro), cada mitad tiene una altura FIJA e IDÉNTICA: el contenido
+   se ancla contra el punto (flex-end arriba / flex-start abajo) y, si es más
+   alto que su mitad, sencillamente se derrama hacia afuera (lejos del punto) sin
+   recortarse, gracias a overflow:visible en el scroller. */
+.porano__event { position: relative; display: flex; flex-direction: column; scroll-snap-align: start; }
+.porano__pad-up, .porano__pad-down {
+  height: clamp(170px, 15vw, 230px); flex: none;
+  display: flex; flex-direction: column; align-items: flex-start; text-align: left;
+  opacity: 0; transform: translateY(10px);
+  transition: opacity var(--dur-slow) var(--ease-out), transform var(--dur-slow) var(--ease-out);
+}
+.porano__pad-up { justify-content: flex-end; padding-bottom: var(--space-4); }
+.porano__pad-down { justify-content: flex-start; padding-top: var(--space-4); }
+.porano__event.is-visible .porano__pad-up,
+.porano__event.is-visible .porano__pad-down { opacity: 1; transform: none; }
+
+.porano__dot {
+  position: relative; z-index: 1; align-self: center; flex: 0 0 auto;
+  width: 9px; height: 9px; border-radius: 50%; background: var(--color-black);
+  transform: scale(0.4); opacity: 0.5;
+  transition: transform var(--dur-slow) var(--ease-out), opacity var(--dur-slow) var(--ease-out), background-color var(--dur-fast);
+}
+.porano__event.is-visible .porano__dot { transform: scale(1); opacity: 1; }
+.porano__event.is-current .porano__dot,
+.porano__event:hover .porano__dot,
+.porano__event:focus-within .porano__dot { background: var(--color-magenta); transform: scale(1.5); }
+
+.porano__year {
+  font-family: var(--font-display); font-weight: 700; font-size: var(--fs-h3);
+  line-height: 1; color: var(--color-black);
+  transition: color var(--dur-base) var(--ease-out);
+}
+.porano__event.is-current .porano__year,
+.porano__event:hover .porano__year,
+.porano__event:focus-within .porano__year { color: var(--color-magenta); }
+
+.porano__thumb-wrap { margin-block: var(--space-3); }
+.porano__thumb {
+  display: block; width: 68px; height: 68px; object-fit: cover;
+  border-radius: 2px; filter: grayscale(1) contrast(1.05);
+  transition: transform var(--dur-base) var(--ease-out);
+}
+.porano__event:hover .porano__thumb,
+.porano__event:focus-within .porano__thumb { transform: scale(1.05); }
+/* variedad tipográfica y de composición: rompe la repetición cada tantos eventos */
+.porano__event:nth-child(3n) .porano__thumb-wrap { margin-left: var(--space-4); }
+.porano__event:nth-child(4n) .porano__name { font-size: calc(var(--fs-subtitle) * 1.12); }
+.porano__event:nth-child(5n) .porano__thumb { width: 84px; height: 84px; }
+
+.porano__name { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-subtitle); line-height: var(--lh-base); margin-bottom: 2px; transition: color var(--dur-base) var(--ease-out); }
+.porano__event:hover .porano__name,
+.porano__event:focus-within .porano__name { color: var(--color-magenta); }
+.porano__movement { font-size: var(--fs-caption); text-transform: uppercase; letter-spacing: var(--tracking-eyebrow); opacity: 0.55; }
+.porano__desc { font-size: 0.92rem; opacity: 0.85; max-width: 26ch; margin-top: var(--space-2); }
+
+@media (max-width: 1023px) {
+  .porano__track { grid-auto-columns: clamp(190px, 24vw, 240px); column-gap: var(--space-6); }
+}
+
+/* mobile: timeline vertical, sin alternancia, dentro del scroll normal del overlay */
+@media (max-width: 900px) {
+  .porano__scroller { overflow-x: visible; overflow-y: visible; cursor: auto; flex: 1 1 auto; min-width: 0; }
+  /* las flechas mueven un scroll horizontal que en mobile ya no existe */
+  .porano__nav-wrap .porano__arrow { display: none; }
+  /* la columna completa (línea + puntos + texto) queda centrada en el viewport:
+     un ancho angosto fijo + margin-inline:auto, en vez de la lógica de desktop
+     (padding-inline sobre un ancho completo, que dejaba todo pegado al borde
+     izquierdo con un enorme vacío a la derecha) */
+  .porano__track {
+    display: flex; flex-direction: column; align-items: stretch;
+    width: min(300px, 100% - 2 * var(--container-padding-x)); margin-inline: auto;
+    padding-inline: 0; padding-block: var(--space-7);
+    gap: var(--space-8);
+  }
+  .porano__spine { left: 4px; right: auto; top: 0; bottom: 0; width: 1.5px; height: auto; transform: none; }
+  .porano__spine-fill { transform: scaleY(var(--p, 0)); transform-origin: top center; }
+  /* el contenido de cada evento vive en pad-up O pad-down según su alternancia de
+     desktop (lo decide JS al armar el DOM); en mobile no hay alternancia visual,
+     así que ambos se muestran apilados en el orden natural del DOM — el que esté
+     vacío simplemente no ocupa espacio, sin necesidad de ocultar nada. */
+  .porano__event { flex-direction: column; align-items: flex-start; padding-left: var(--space-6); }
+  /* en mobile la altura fija de desktop no aplica: cada bloque ocupa su alto natural */
+  .porano__pad-up, .porano__pad-down { height: auto; flex: none; justify-content: flex-start; padding: 0; opacity: 1; transform: none; }
+  .porano__dot { position: absolute; left: 4px; top: 6px; transform: translateX(-50%) scale(0.4); }
+  .porano__event.is-visible .porano__dot { transform: translateX(-50%) scale(1); }
+  .porano__event.is-current .porano__dot,
+  .porano__event:hover .porano__dot,
+  .porano__event:focus-within .porano__dot { transform: translateX(-50%) scale(1.5); }
+  .porano__event:nth-child(3n) .porano__thumb-wrap { margin-left: 0; }
 }
 
 /* ---------- 12. NEWSLETTER ---------- */
@@ -1246,6 +1410,10 @@ body.is-cursor-custom .cursor.is-visible { display: block; }
   z-index: 9999;
   will-change: transform;
 }
+
+/* sobre botones/links: sin inversión de color (blend normal); solo un punto
+   neutro translúcido que se agranda apenas. El tamaño lo maneja JS (targetScale). */
+.cursor.is-plain .cursor__ball { mix-blend-mode: normal; background: rgba(0, 0, 0, 0.5); }
 
 /* ---------- Lente duotono magenta DENTRO del círculo, solo sobre fotos ----------
    Sobre fotos el círculo deja de invertir y funciona como lente: backdrop-filter tiñe

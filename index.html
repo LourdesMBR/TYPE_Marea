@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Asap:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="styles.css?v=21">
+<link rel="stylesheet" href="styles.css?v=29">
 </head>
 <!-- fx-photo-duotone: duotono magenta sobre fotos de arte (removible: borrá esa clase) -->
 <body class="is-loading fx-photo-duotone">
@@ -590,8 +590,8 @@
 
       <div class="aprende-band aprende-band--black aprende-band--desc" >
         <div class="aprende-band__head"  style="border-bottom-left-radius: 20px!important;border-top-left-radius: 20px!important;">
-          <span class="aprende-band__label">Por año</span>
-          <a class="link-cta" href="#">Ver más<svg aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+          <span class="aprende-band__label" data-porano-open role="button" tabindex="0" aria-label="Abrir Aprendé por año">Por año</span>
+          <a class="link-cta" href="#por-anio" data-porano-open>Ver más<svg aria-hidden="true"><use href="#icon-arrow"/></svg></a>
         </div>
         <div class="aprende-band__shelf" style="border-bottom-right-radius: 20px!important;"></div>
 </div>
@@ -685,6 +685,39 @@
     </div>
   </section>
 
+  <!-- Sub-sección: Aprendé por año (overlay; se abre desde la banda "Por año").
+       Línea de tiempo editorial: el track de eventos (data-porano-track) lo arma
+       JS desde TIMELINE en initYearExplorer(). Estructura de datos ver script.js. -->
+  <section class="porano" id="por-anio" data-porano aria-label="Aprendé por año" aria-hidden="true">
+    <div class="porano__inner">
+      <button type="button" class="porcolor__close" data-overlay-close aria-label="Cerrar">
+        <svg aria-hidden="true"><use href="#icon-close"/></svg>
+      </button>
+
+      <header class="container porano__head">
+        <p class="eyebrow porano__eyebrow">04. — Índice cronológico</p>
+        <h2 class="text-h1 porano__title">Una historia del arte,<br>año a año</h2>
+        <p class="text-lead porano__intro">De 1401 a hoy: treinta y ocho nombres que cambiaron la forma de mirar. Deslizá para recorrer la línea de tiempo.</p>
+      </header>
+
+      <div class="porano__timeline">
+        <div class="porano__nav-wrap">
+          <button type="button" class="porano__arrow" data-porano-prev aria-label="Retroceder en la línea de tiempo">
+            <svg aria-hidden="true"><use href="#icon-chevron-left"/></svg>
+          </button>
+          <div class="porano__scroller" data-porano-scroll tabindex="0" role="region" aria-label="Línea de tiempo de artistas por año, desplazá con las flechas o arrastrá">
+            <ul class="porano__track" data-porano-track role="list">
+              <!-- JS (initYearExplorer) inyecta un <li class="porano__event"> por artista -->
+            </ul>
+          </div>
+          <button type="button" class="porano__arrow" data-porano-next aria-label="Avanzar en la línea de tiempo">
+            <svg aria-hidden="true"><use href="#icon-chevron-right"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- NEWSLETTER -->
   <section class="newsletter" id="newsletter">
     <div class="container newsletter__inner" data-reveal>
@@ -745,6 +778,6 @@
   </div>
 </footer>
 
-<script src="script.js?v=21" defer></script>
+<script src="script.js?v=27" defer></script>
 </body>
 </html>
