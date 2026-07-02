@@ -593,6 +593,7 @@ body:not(.is-loading) .hero__title-line--bold .word {
   .mira-intro__head, .mira-intro__cta, .mira-intro__subtitle, .mira-intro__caption { position: static; width: auto; }
   .mira-intro__cta { align-self: flex-start; }
   .mira-intro__media { flex: 1 1 auto; min-height: 230px; }
+  .mira-intro__subtitle { text-align: center; }
 
   /* paneles de contenido: una sola columna + tipografía compacta para que el
      contenido entre en ~100vh (minimiza el scroll interno de los paneles) */
@@ -617,6 +618,14 @@ body:not(.is-loading) .hero__title-line--bold .word {
     position: static; right: auto; top: auto; transform: none;
     width: min(60%, 280px); margin: var(--space-5) auto 0; border-radius: var(--radius-sm);
   }
+}
+
+@media (max-width: 767px) {
+  /* el collage deja un hueco vacío debajo del racimo de cards (degas/miguelangel);
+     subimos la frase para que caiga ahí, entre las fotos, en vez de debajo de todas.
+     left/top se resetean: son remanentes del position:absolute de desktop y, como
+     offset de un position:relative, tiraban el texto fuera de la pantalla. */
+  .mira-intro__subtitle { position: relative; top: auto; left: auto; z-index: 2; margin-top: -82px; }
 }
 
 /* ---------- 7. MARQUEES ---------- */
@@ -787,7 +796,23 @@ body:not(.is-loading) .hero__title-line--bold .word {
 }
 
 .mostra__head .text-h1 { margin-block: var(--space-3) 0; }
-.mostra__subtitle { margin-block: var(--space-7) var(--space-8); max-width: 30ch; }
+
+/* fila de intro: marco (con el CTA "Subí tu obra" adentro) + columna de texto,
+   lado a lado. Reutiliza el mismo patrón visual que .mostra__cta-frame de abajo
+   (imagen de marco en absolute + botón centrado encima), con Marco 02.svg —
+   dibujado en negro, pensado para fondo blanco (a diferencia de Marco.svg, en
+   blanco, para la banda de cierre que es negra). */
+.mostra__intro-row { display: flex; align-items: center; gap: var(--space-8); margin-block: var(--space-7) var(--space-8); }
+.mostra__intro-frame {
+  position: relative; display: flex; align-items: center; justify-content: center;
+  flex: 1 1 40%; max-width: 420px; aspect-ratio: 663 / 511;
+  color: var(--color-black);
+}
+.mostra__intro-frame-img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
+.mostra__intro-frame .btn { position: relative; z-index: 1; }
+.mostra__intro-text { flex: 1 1 60%; min-width: 0; }
+
+.mostra__subtitle { margin-block: 0 var(--space-6); max-width: 30ch; }
 .mostra__grid { display: grid; grid-template-columns: 1fr; gap: var(--space-6); align-items: start; max-width: 56ch; }
 .mostra__col .text-body + .text-body { margin-top: var(--space-5); }
 .mostra__pullquote { max-width: 56ch; margin-top: var(--space-8); }
@@ -804,6 +829,15 @@ body:not(.is-loading) .hero__title-line--bold .word {
 .mostra-panel--reverse { flex-direction: row-reverse; }
 
 .mostra-panel__media { flex: 0 0 46%; position: relative; aspect-ratio: 4/5; overflow: hidden; }
+/* mismo aspect-ratio (4/5) que el resto: solo se achica el ancho de la caja,
+   el alto lo sigue en proporción, así no se deforma la imagen. Escopeado a
+   desktop porque en mobile .mostra-panel__media pasa a flex:0 0 auto (ancho
+   completo apilado) y esta reducción no aplica ahí. */
+@media (min-width: 1024px) {
+  [data-mpanel="obra-2"] .mostra-panel__media { flex-basis: 27.6%; } /* historia-02.jpg al 60% */
+  [data-mpanel="obra-3"] .mostra-panel__media { flex-basis: 23%; } /* historia-04.jpg al 50% */
+  [data-mpanel="obra-4"] .mostra-panel__media { flex-basis: 18.4%; } /* historia-03.jpg al 40% */
+}
 /* sangrado vertical para el parallax: top/left + width/height explícitos (no el
    shorthand "inset"), igual que el de Mirá — en un <img> (elemento reemplazado),
    fijar los 4 lados sin alto explícito cae al tamaño intrínseco y el alto
@@ -812,6 +846,10 @@ body:not(.is-loading) .hero__title-line--bold .word {
 .mostra-panel__media .mostra__obra-card-cover {
   position: absolute; top: -10%; left: 0; width: 100%; max-width: none; height: 120%; object-fit: cover;
 }
+/* imagen cuadrada recortada en un marco más alto que ancho (overflow horizontal):
+   corremos el encuadre hacia la izquierda para que el sujeto de la escena quede
+   visible ya desde el primer panel, sin tocar proporción ni tamaño. */
+.mostra-panel__media img[src*="gomez-ultima-luz"] { object-position: 10% 50%; }
 .mostra-panel__media .mostra__obra-card-cover {
   display: flex; align-items: center; justify-content: center; padding: var(--space-5); text-align: center;
   font-family: var(--font-display); font-weight: 700; font-size: var(--fs-h3); color: var(--color-black);
@@ -844,6 +882,51 @@ body:not(.is-loading) .hero__title-line--bold .word {
 .mostra-bar__eyebrow { color: var(--color-magenta); margin: 0; }
 .mostra-bar .link-cta { font-size: var(--fs-caption); }
 .mostra-bar__pullquote { font-size: var(--fs-caption); max-width: 28ch; }
+
+/* Preview de la obra del mes. Vive DENTRO del panel de intro (no en la barra
+   .mostra-bar, que es position:absolute y queda pinned): así se desplaza junto
+   con el track en el scroll horizontal, moviéndose con la sección.
+   Es "una mitad" de .mostra-panel__media: mismo alto, la mitad del ancho. El
+   panel de obra es flex-basis 46% con aspect 4/5 → ~43vw ancho / ~54vw alto;
+   acá tomamos la MITAD del ancho (~21.5vw) y aspecto 2/5 (la mitad de 4/5), con
+   lo que el alto vuelve a dar ~54vw = mismo alto del panel. Una sola foto: el
+   object-fit:cover + object-position:10% (heredados de .mostra-panel__media)
+   muestran una franja vertical de la obra, emulando media imagen. */
+@media (min-width: 1024px) {
+  /* Ancho = EXACTAMENTE la mitad del ancho de la media de obra-1. Esa media es
+     flex-basis 46% de (100vw − padding derecho); tomamos 0.23·(100vw − pad) =
+     la mitad, y con aspect 2/5 el alto da 0.575·(100vw − pad) = idéntico al de
+     la media de obra-1 (46%·1.25). Así preview y media de obra-1 coinciden en
+     alto en cualquier ancho y no queda escalón en la costura. */
+  /* el preview se posiciona respecto al PANEL (.mostra-panel, ya position:relative
+     y de ancho completo 100vw), NO respecto al .container: el container tiene
+     max-width 1440 y se centra, así que en viewports anchos su borde derecho
+     queda por dentro de la costura. Por eso NO ponemos position:relative acá. */
+  .mostra-panel--intro {
+    --intro-preview-w: calc(0.23 * (100vw - var(--container-padding-x)));
+  }
+  /* reserva el hueco a la derecha para que el texto no quede bajo el preview */
+  .mostra__intro-row { padding-right: calc(var(--intro-preview-w) + var(--space-8)); }
+  /* right:0 → el preview queda a ras del borde derecho del panel de intro (la
+     costura con el panel siguiente), sin el padding lateral. */
+  .mostra__intro-preview {
+    position: absolute; right: 0; top: 50%;
+    transform: translateY(-50%);
+    width: var(--intro-preview-w); aspect-ratio: 2 / 5;
+    border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+  }
+  /* El primer panel de obra alinea su imagen a la IZQUIERDA (a ras de la costura)
+     en vez de centrar el contenido, para que continúe sin hueco desde el preview
+     de la intro que llega por el borde derecho. Solo obra-1: el resto sigue
+     centrado. */
+  [data-mpanel="obra-1"] { justify-content: flex-start; padding-left: 0; }
+  [data-mpanel="obra-1"] .mostra-panel__media { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; overflow: hidden; }
+}
+/* en mobile no hay preview (igual que antes con la barra oculta): el panel de
+   intro se apila y el collage/texto ocupan el ancho completo. */
+@media (max-width: 1023px) {
+  .mostra__intro-preview { display: none; }
+}
 
 .mostra__cta-band { background: var(--color-black); color: var(--color-white); padding-block: var(--space-9); text-align: center; }
 .mostra__cta-band .text-h2 { max-width: 20ch; margin-inline: auto; margin-bottom: var(--space-9); }
@@ -881,7 +964,10 @@ body:not(.is-loading) .hero__title-line--bold .word {
   .mostra-panel__info { max-width: none; }
   /* tipografía mobile: evitar textos pisados / que entre en el panel */
   .mostra__head .text-h1 { font-size: clamp(2rem, 1.5rem + 3vw, 3rem); margin-block: var(--space-2) 0; }
-  .mostra__subtitle { margin-block: var(--space-4) var(--space-5); font-size: clamp(1rem, 0.95rem + 1vw, 1.125rem); }
+  /* el marco no entra al lado del texto en una columna angosta: se apilan */
+  .mostra__intro-row { flex-direction: column; align-items: stretch; gap: var(--space-5); margin-block: var(--space-5) var(--space-6); }
+  .mostra__intro-frame { max-width: min(280px, 70vw); margin-inline: auto; }
+  .mostra__subtitle { margin-block: 0 var(--space-5); font-size: clamp(1rem, 0.95rem + 1vw, 1.125rem); }
   .mostra__grid, .mostra__pullquote { max-width: none; }
   .mostra__col .text-body + .text-body { margin-top: var(--space-3); }
   .mostra__cta-frame { width: clamp(280px, 84vw, 560px); }
@@ -898,23 +984,73 @@ body:not(.is-loading) .hero__title-line--bold .word {
   --unit: clamp(44px, 5.5vw, 80px);
   --radius: clamp(24px, 2.5vw, 40px);
   --head-w: 30%;
+  /* Crece solo en el eje Y y desde el borde inferior (ver transform-origin
+     más abajo): ese borde es el que cada ficha comparte con la siguiente,
+     así que si nunca se mueve, nunca se abre un hueco, sin importar cuál
+     ficha esté activa. --band-rise-inverse es su inversa exacta —misma
+     caja, mismo punto de anclaje— para anular el crecimiento heredado del
+     contenedor en la ficha vecina que no debe moverse (ver más abajo). */
+  --band-rise: scaleY(1.09);
+  --band-rise-inverse: scaleY(calc(1 / 1.09));
 }
 
 .aprende-band {
   display: flex; align-items: flex-end;
-  /* la elevación es solo transform/filter (sin reflow): no mueve a las demás bandas */
+  transform-origin: bottom;
   transition: transform 0.35s cubic-bezier(.22, 1, .36, 1), filter 0.35s cubic-bezier(.22, 1, .36, 1);
   will-change: transform;
 }
-/* cada banda se eleva de forma independiente al pasar el cursor. Usamos
+.aprende-band-wrap {
+  transform-origin: bottom;
+  transition: transform 0.35s cubic-bezier(.22, 1, .36, 1);
+}
+/* Cada ficha (banda + el wrapper de color que pinta su recorte en L) sube
+   de forma independiente al pasar el cursor; el resto no se entera. Usamos
    filter:drop-shadow (no box-shadow) porque la banda es una silueta en L
    —cabezal alto + repisa baja— y la sombra debe seguir su contorno real,
    no el rectángulo contenedor con su esquina vacía. */
 @media (hover: hover) and (pointer: fine) {
   .aprende-band:hover {
-    transform: translateY(-12px) scale(1.01);
+    transform: var(--band-rise);
     z-index: 5;
     filter: drop-shadow(0 16px 26px rgba(0, 0, 0, 0.22));
+  }
+
+  /* Caso 1 — banda envuelta: si la banda hovereada vive dentro de un div de
+     fondo (relleno de color del recorte en L), ese contenedor tiene que
+     crecer exactamente igual para que suban como una sola pieza; la banda
+     no vuelve a crecer por su cuenta porque ya hereda el crecimiento de su
+     contenedor. */
+  .aprende-band-wrap:has(> .aprende-band:hover) {
+    transform: var(--band-rise);
+  }
+  .aprende-band-wrap:has(> .aprende-band:hover) > .aprende-band:hover {
+    transform: none;
+  }
+
+  /* Caso 2 — wrapper siguiente: el wrapper que viene justo después pinta el
+     color de ESTA ficha en su propio recorte (por eso también debe subir
+     con ella), pero por dentro contiene a la banda de la ficha SIGUIENTE
+     —independiente—. A esa banda le aplicamos la escala inversa para
+     anular el crecimiento que heredaría de su contenedor y que se quede
+     perfectamente quieta mientras el wrapper (y su parche de color) sube. */
+  .aprende-grid > .aprende-band:hover + .aprende-band-wrap,
+  .aprende-band-wrap:has(> .aprende-band:hover) + .aprende-band-wrap {
+    transform: var(--band-rise);
+  }
+  .aprende-grid > .aprende-band:hover + .aprende-band-wrap > .aprende-band,
+  .aprende-band-wrap:has(> .aprende-band:hover) + .aprende-band-wrap > .aprende-band {
+    transform: var(--band-rise-inverse);
+  }
+
+  /* --band-rise estira todo lo que hay adentro de la banda, texto incluido:
+     sin esto el label y el link se ven deformados (más altos) mientras la
+     ficha está activa. Se le aplica la escala inversa exactamente a ellos
+     —no a .aprende-band__head, que sí debe crecer junto con su fondo— para
+     que el contenido se lea con las proporciones normales. */
+  .aprende-band:hover .aprende-band__label,
+  .aprende-band:hover .link-cta {
+    transform: var(--band-rise-inverse);
   }
 }
 
@@ -1401,7 +1537,7 @@ body.is-cursor-custom .cursor.is-visible { display: block; }
    transition, para que el seguimiento no quede laggeado. */
 .cursor__ball {
   position: fixed; top: 0; left: 0;
-  width: 40px; height: 40px;
+  width: 30px; height: 30px;
   margin: -20px 0 0 -20px;
   border-radius: 50%;
   background: var(--color-white);
@@ -1413,7 +1549,7 @@ body.is-cursor-custom .cursor.is-visible { display: block; }
 
 /* sobre botones/links: sin inversión de color (blend normal); solo un punto
    neutro translúcido que se agranda apenas. El tamaño lo maneja JS (targetScale). */
-.cursor.is-plain .cursor__ball { mix-blend-mode: normal; background: rgba(0, 0, 0, 0.5); }
+.cursor.is-plain .cursor__ball { mix-blend-mode: normal; background: rgb(0, 0, 0); }
 
 /* ---------- Lente duotono magenta DENTRO del círculo, solo sobre fotos ----------
    Sobre fotos el círculo deja de invertir y funciona como lente: backdrop-filter tiñe
@@ -1421,6 +1557,6 @@ body.is-cursor-custom .cursor.is-visible { display: block; }
    la clase fx-photo-duotone del <body>. */
 .cursor.is-photo .cursor__ball { mix-blend-mode: normal; background: transparent; }
 body.fx-photo-duotone .cursor.is-photo .cursor__ball {
-  -webkit-backdrop-filter: grayscale(1) sepia(1) saturate(3.4) hue-rotate(260deg) contrast(1.08);
-          backdrop-filter: grayscale(1) sepia(1) saturate(3.4) hue-rotate(260deg) contrast(1.08);
+  -webkit-backdrop-filter: grayscale(1.2) sepia(1) saturate(3.4) hue-rotate(260deg) contrast(1.08);
+          backdrop-filter: grayscale(1.2) sepia(1) saturate(3.4) hue-rotate(260deg) contrast(1.08);
 }

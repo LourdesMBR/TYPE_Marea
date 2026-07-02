@@ -462,9 +462,9 @@
   /* ---------- Cursor personalizado: circle-follow nativo (sin GSAP) ---------- */
   let cursor = null;
   // el círculo se agranda SOLO sobre texto — no sobre botones, links ni imágenes.
-  const CURSOR_TEXT = "p, h1, h2, h3, h4, h5, h6, li, blockquote, figcaption, em, strong, [class*='text-'], .eyebrow";
-  const CURSOR_BTN = "a, button, .btn, .cta, .link-cta, [role='button']";
-  const CURSOR_NOGROW = "a, button, input, textarea, label, img, picture, svg, .btn, .cta, .link-cta, [role='button']";
+  const CURSOR_TEXT = "p, h1, h2, h3, h4, h5, h6, li, blockquote, figcaption, em, strong, [class*='text-'], .eyebrow, .hero";
+  const CURSOR_BTN = "a, button, .btn, .cta, .link-cta, [role='button'], .hero ";
+  const CURSOR_NOGROW = "a, button, input, textarea, label, img, picture, svg, .btn, .cta, .link-cta, [role='button'],";
   function isTextTarget(el) {
     return !!(el && el.closest && el.closest(CURSOR_TEXT) && !el.closest(CURSOR_NOGROW));
   }
