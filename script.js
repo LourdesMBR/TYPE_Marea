@@ -30,9 +30,18 @@
   const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
 
   /* ---------- boot ---------- */
+  // Ancho real del scrollbar (0 si es overlay). El eje de lectura (--reading-axis)
+  // lo usa para que los títulos en paneles de 100vw (Mirá, Mostrá) caigan sobre el
+  // mismo eje que el logo/containers, que se miden en ancho de contenido (sin scrollbar).
+  function setScrollbarVar() {
+    const sbw = Math.max(0, window.innerWidth - document.documentElement.clientWidth);
+    document.documentElement.style.setProperty("--sbw", sbw + "px");
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
     document.body.classList.remove("is-loading");
 
+    setScrollbarVar();
     initHeader();
     initHeroParallax();
     initReveal();
@@ -49,6 +58,7 @@
 
     window.addEventListener("resize", debounce(() => {
       readCaps();
+      setScrollbarVar();
       refreshMira();
       refreshMostra();
       cursor?.refresh();

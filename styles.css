@@ -97,6 +97,27 @@ body {
   /* alto aprox. del header sticky: las subpáginas (overlays) dejan este espacio
      arriba para no quedar tapadas por el nav, que permanece visible */
   --header-h: 64px;
+
+  /* Eje de lectura único: coincide con el borde izquierdo del logo y con el
+     borde izquierdo de cualquier .container (que se centra por --container-max).
+     Se calcula en coordenadas de viewport para poder aplicarlo también a los
+     títulos que viven en paneles de 100vw (Mirá, Mostrá), restando el scrollbar
+     (--sbw, lo setea el JS) para no desviarse respecto a los containers, que se
+     miden en ancho de contenido. Por debajo de --container-max, cae en el
+     padding lateral (igual que el container). */
+  --sbw: 0px;
+  --reading-axis: max(
+    var(--container-padding-x),
+    calc((100vw - var(--sbw) - var(--container-max)) / 2 + var(--container-padding-x))
+  );
+  /* dónde cae el borde izquierdo de un .container centrado, pero medido en 100vw
+     (incluyendo scrollbar). La diferencia (--reading-axis menos esto) es 0 por
+     debajo de --container-max y −scrollbar/2 por encima: sirve para reencolumnar
+     títulos que viven dentro de un container auto-centrado en un panel de 100vw. */
+  --container-left-vw: max(
+    var(--container-padding-x),
+    calc((100vw - var(--container-max)) / 2 + var(--container-padding-x))
+  );
 }
 
 /* ---------- 3. PRIMITIVES ---------- */
@@ -368,7 +389,7 @@ body:not(.is-loading) .hero__title-line--bold .word {
 
 /* --- panel intro (slide 1 del carrusel) --- */
 .mira-panel--intro { display: block; padding: clamp(6rem, 5rem + 3vw, 7.5rem) var(--container-padding-x) var(--space-7); }
-.mira-intro__head { position: absolute; left: var(--container-padding-x); top: clamp(6rem, 5rem + 3vw, 7.5rem); width: 26%; z-index: 1; }
+.mira-intro__head { position: absolute; left: var(--reading-axis); top: clamp(6rem, 5rem + 3vw, 7.5rem); width: 26%; z-index: 1; }
 .mira-intro__head .text-h1 { margin-bottom: var(--space-4); }
 .mira-intro__head .text-body { opacity: 0.8; }
 
@@ -795,6 +816,10 @@ body:not(.is-loading) .hero__title-line--bold .word {
   overflow: hidden;
 }
 
+/* el head vive en un .container auto-centrado dentro de un panel de 100vw, que
+   en desktop queda scrollbar/2 a la derecha del eje real; lo reencolumnamos sobre
+   --reading-axis (0 en mobile, imperceptible en desktop). */
+.mostra__head { margin-left: calc(var(--reading-axis) - var(--container-left-vw)); }
 .mostra__head .text-h1 { margin-block: var(--space-3) 0; }
 
 /* fila de intro: marco (con el CTA "Subí tu obra" adentro) + columna de texto,
@@ -886,22 +911,19 @@ body:not(.is-loading) .hero__title-line--bold .word {
 /* Preview de la obra del mes. Vive DENTRO del panel de intro (no en la barra
    .mostra-bar, que es position:absolute y queda pinned): así se desplaza junto
    con el track en el scroll horizontal, moviéndose con la sección.
-   Es "una mitad" de .mostra-panel__media: mismo alto, la mitad del ancho. El
-   panel de obra es flex-basis 46% con aspect 4/5 → ~43vw ancho / ~54vw alto;
-   acá tomamos la MITAD del ancho (~21.5vw) y aspecto 2/5 (la mitad de 4/5), con
-   lo que el alto vuelve a dar ~54vw = mismo alto del panel. Una sola foto: el
-   object-fit:cover + object-position:10% (heredados de .mostra-panel__media)
-   muestran una franja vertical de la obra, emulando media imagen. */
+   Preview + media de obra-1 forman UNA SOLA imagen continua, partida en la
+   costura entre paneles: el preview muestra la porción izquierda de la obra y
+   obra-1 la derecha, empalmando pixel a pixel. */
 @media (min-width: 1024px) {
-  /* Ancho = EXACTAMENTE la mitad del ancho de la media de obra-1. Esa media es
-     flex-basis 46% de (100vw − padding derecho); tomamos 0.23·(100vw − pad) =
-     la mitad, y con aspect 2/5 el alto da 0.575·(100vw − pad) = idéntico al de
-     la media de obra-1 (46%·1.25). Así preview y media de obra-1 coinciden en
-     alto en cualquier ancho y no queda escalón en la costura. */
-  /* el preview se posiciona respecto al PANEL (.mostra-panel, ya position:relative
-     y de ancho completo 100vw), NO respecto al .container: el container tiene
-     max-width 1440 y se centra, así que en viewports anchos su borde derecho
-     queda por dentro de la costura. Por eso NO ponemos position:relative acá. */
+  /* Preview + media de obra-1 teselan el cuadro entero (una sola imagen):
+     ambas cajas comparten alto → misma escala. El <img> hereda height:120% de
+     .mostra-panel__media, así que el cuadro (cuadrado) se escala a 1.2·alto de
+     ancho. Para cubrirlo sin solape: ancho_preview + ancho_obra = 1.2·alto.
+     obra-1 = 0.46·(100vw−pad) de ancho, alto = ancho·1.25 → ancho_preview =
+     1.2·alto − ancho_obra = 0.5·ancho_obra = 0.23·(100vw−pad), aspect 2/5.
+     Así preview cubre el ~33% izquierdo y obra-1 el ~67% derecho, empalmando.
+     El preview se posiciona respecto al PANEL (100vw), NO al .container (max-width
+     1440 centrado, cuyo borde derecho queda por dentro de la costura). */
   .mostra-panel--intro {
     --intro-preview-w: calc(0.23 * (100vw - var(--container-padding-x)));
   }
@@ -910,17 +932,34 @@ body:not(.is-loading) .hero__title-line--bold .word {
   /* right:0 → el preview queda a ras del borde derecho del panel de intro (la
      costura con el panel siguiente), sin el padding lateral. */
   .mostra__intro-preview {
-    position: absolute; right: 0; top: 50%;
+    position: absolute; right: 0;
+    /* obra-1 centra su media dentro del content-box del panel (padding-block
+       asimétrico: 120px arriba / section-padding-y abajo), quedando ~5px por
+       debajo del centro del panel. El preview se centra sobre el panel completo,
+       así que sumamos ese mismo (padTop − padBottom)/2 para que el horizonte
+       coincida exacto en la costura (mismo padding en ambos paneles → exacto en
+       cualquier ancho). */
+    top: calc(50% + (clamp(6rem, 5rem + 3vw, 7.5rem) - var(--section-padding-y)) / 2);
     transform: translateY(-50%);
     width: var(--intro-preview-w); aspect-ratio: 2 / 5;
     border-radius: var(--radius-sm) 0 0 var(--radius-sm);
   }
+  /* el preview muestra la porción IZQUIERDA del cuadro (object-position left) */
+  .mostra-panel--intro .mostra__intro-preview img { object-position: left center; }
   /* El primer panel de obra alinea su imagen a la IZQUIERDA (a ras de la costura)
-     en vez de centrar el contenido, para que continúe sin hueco desde el preview
-     de la intro que llega por el borde derecho. Solo obra-1: el resto sigue
-     centrado. */
+     en vez de centrar el contenido, para que continúe sin hueco desde el preview.
+     Solo obra-1: el resto sigue centrado. */
   [data-mpanel="obra-1"] { justify-content: flex-start; padding-left: 0; }
   [data-mpanel="obra-1"] .mostra-panel__media { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; overflow: hidden; }
+  /* y muestra la porción DERECHA (object-position right): continúa justo donde
+     termina el preview → preview + obra-1 = una sola imagen. */
+  [data-mpanel="obra-1"] .mostra-panel__media img { object-position: right center; }
+  /* El JS de parallax le pone translateY distinto a cada panel (±35px): en la
+     costura separaría el preview y obra-1 ~70px en vertical, rompiendo la
+     continuidad. Lo anulamos en ambas imágenes (el inline del JS se gana con
+     !important) para que compartan exactamente el mismo recorte vertical. */
+  .mostra-panel--intro .mostra__intro-preview img,
+  [data-mpanel="obra-1"] .mostra-panel__media img { transform: none !important; }
 }
 /* en mobile no hay preview (igual que antes con la barra oculta): el panel de
    intro se apila y el collage/texto ocupan el ancho completo. */
