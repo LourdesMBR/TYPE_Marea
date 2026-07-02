@@ -43,6 +43,7 @@ body {
   --color-turquoise: #F137A5;
   --color-lime: #CEF564;
   --color-magenta: #4100F5;
+  --color-cyan: #5EDAEF;
 
   /* Botones (regla obligatoria: primario siempre turquesa) */
   --btn-primary-bg: var(--color-turquoise);
@@ -143,7 +144,7 @@ body {
 :focus-visible { outline: 2px solid var(--color-turquoise); outline-offset: 3px; }
 
 /* Tipografía — clases de uso */
-.text-display { font-family: var(--font-display); font-size: var(--fs-display); line-height: var(--lh-base); font-weight: 700; letter-spacing: var(--tracking-tight); }
+.text-display { font-family: var(--font-display); font-size: var(--fs-display); line-height: 100%;text-transform: uppercase;font-weight: 700; letter-spacing: var(--tracking-tight); }
 .text-h1       { font-family: var(--font-display); font-size: var(--fs-h1); line-height: var(--lh-base); font-weight: 700; letter-spacing: var(--tracking-tight); }
 .text-h2       { font-family: var(--font-display); font-size: var(--fs-h2); line-height: var(--lh-base); font-weight: 700; letter-spacing: var(--tracking-tight); }
 .text-h3       { font-family: var(--font-display); font-size: var(--fs-h3); line-height: var(--lh-base); font-weight: 600; }
@@ -321,7 +322,11 @@ body:not(.is-loading) .hero__watermark { opacity: 1; }
 }
 @keyframes watermark-breathe { 0%, 100% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.025) rotate(0.4deg); } }
 
-.hero__inner { position: relative; z-index: 1; max-width: 920px; }
+/* sin max-width propio: .hero__inner ya es .container (max-width:1440 +
+   margin-inline:auto), que es lo que lo alinea al eje de lectura en cualquier
+   ancho. Ponerle un max-width menor acá centraba la caja entera (auto-margin)
+   en vez de dejarla pegada al padding izquierdo, como el resto de los títulos. */
+.hero__inner { position: relative; z-index: 1; }
 
 .hero__eyebrow, .hero__title, .hero__lead, .hero__ctas {
   opacity: 0; transform: translateY(18px);
@@ -682,7 +687,7 @@ body:not(.is-loading) .hero__title-line--bold .word {
   overflow-x: auto; scroll-snap-type: x mandatory;
   /* overflow-x:auto fuerza a overflow-y a comportarse como auto también (no "visible"),
      así que recorta la etiqueta que sobresale arriba de cada card si no le damos aire */
-  padding: var(--space-5) var(--container-padding-x) 0; scroll-padding-inline: var(--container-padding-x);
+  padding: var(--space-7) var(--container-padding-x) 0; scroll-padding-inline: var(--container-padding-x);
   cursor: grab; scrollbar-width: none;
 }
 .crea-deck__list::-webkit-scrollbar { display: none; }
@@ -691,24 +696,42 @@ body:not(.is-loading) .hero__title-line--bold .word {
 .crea-card {
   position: relative; flex: 0 0 auto; scroll-snap-align: start;
   width: min(86vw, 420px); height: clamp(460px, 50vw, 540px);
-  background: var(--color-white); border: 1.5px solid var(--color-black); border-radius: var(--radius-md);
+  border: none; border-radius: 20px 0 20px 20px;
   padding: var(--space-6); display: flex; flex-direction: column;
   user-select: none;
 }
 
 .crea-card__tag {
-  position: absolute; top: -1px; right: var(--space-5); transform: translateY(-50%);
-  background: var(--color-white); border: 1.5px solid var(--color-black); border-radius: var(--radius-pill);
-  padding: 0.3em 1em; font-size: var(--fs-caption); font-weight: 600;
+  position: absolute;
+  top: 0;
+  right: 0;
+  transform: translateY(-100%);
+  border-radius: 12px 12px 0 0;
+  padding: 0.45em 1.5em;
+  font-size: var(--fs-caption);
+  font-weight: 700;
 }
-.crea-card__day { font-family: var(--font-body); opacity: 0.65; margin-top: var(--space-3); }
+.crea-card__day { font-family: var(--font-body); opacity: 0.7; margin-top: var(--space-3); }
 .crea-card__date { font-family: var(--font-display); font-size: 2.6rem; line-height: 1; margin-block: 2px var(--space-4); }
 .crea-card__date strong { font-weight: 700; }
 .crea-card h3 { margin-bottom: var(--space-3); }
-.crea-card .text-body { font-size: 0.92rem; flex-grow: 1; overflow: hidden; }
-.crea-card__meta { display: flex; flex-direction: column; gap: var(--space-2); margin-block: var(--space-4); font-size: var(--fs-caption); opacity: 0.75; }
+.crea-card .text-body { font-size: 0.92rem; flex-grow: 1; overflow: hidden; opacity: 0.9; }
+.crea-card__meta { display: flex; flex-direction: column; gap: var(--space-2); margin-block: var(--space-4); font-size: var(--fs-caption); opacity: 0.8; }
 .crea-card__meta span { display: flex; align-items: center; gap: var(--space-2); }
 .crea-card__meta svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+/* Alternancia de color de fondo y texto (Lima, Fucsia, Azul/Magenta, Cian) */
+.crea-card:nth-child(4n+1) { background: var(--color-lime); color: var(--color-black); }
+.crea-card:nth-child(4n+1) .crea-card__tag { background: var(--color-lime); color: var(--color-black); }
+
+.crea-card:nth-child(4n+2) { background: var(--color-turquoise); color: var(--color-white); }
+.crea-card:nth-child(4n+2) .crea-card__tag { background: var(--color-turquoise); color: var(--color-white); }
+
+.crea-card:nth-child(4n+3) { background: var(--color-magenta); color: var(--color-white); }
+.crea-card:nth-child(4n+3) .crea-card__tag { background: var(--color-magenta); color: var(--color-white); }
+
+.crea-card:nth-child(4n+4) { background: var(--color-cyan); color: var(--color-black); }
+.crea-card:nth-child(4n+4) .crea-card__tag { background: var(--color-cyan); color: var(--color-black); }
 
 @media (max-width: 1023px) {
   .crea-month__arrow { width: 44px; height: 44px; }
@@ -728,7 +751,12 @@ body:not(.is-loading) .hero__title-line--bold .word {
   position: absolute; inset: 0;
   background: var(--slide-bg); color: var(--slide-fg);
   display: flex; flex-direction: column; justify-content: center;
-  padding: var(--section-padding-y) clamp(4rem, 2rem + 6vw, 8rem);
+  /* .quotes es full-bleed (100vw, sin .container): el padding-left usa el mismo
+     --reading-axis que alinea los demás títulos con el logo, en vez de un clamp()
+     propio que no coincidía con ningún otro margen de la landing. */
+  padding-block: var(--section-padding-y);
+  padding-left: var(--reading-axis);
+  padding-right: clamp(4rem, 2rem + 6vw, 8rem);
   transform: translateX(100%);
   transition: transform var(--dur-slow) var(--ease-in-out);
   z-index: 1;
@@ -738,7 +766,7 @@ body:not(.is-loading) .hero__title-line--bold .word {
 .quotes__slide[data-pos="next"] { transform: translateX(100%); }
 
 .quotes__mark {
-  position: absolute; top: var(--space-6); left: clamp(1.5rem, 1rem + 2vw, 3rem);
+  position: absolute; top: var(--space-6); left: var(--reading-axis);
   font-family: var(--font-display); font-size: 4rem; font-weight: 800; line-height: 1;
   color: var(--slide-accent);
 }
@@ -747,7 +775,9 @@ body:not(.is-loading) .hero__title-line--bold .word {
   font-family: var(--font-body); font-weight: 700; text-transform: uppercase; letter-spacing: 0.2em;
   font-size: var(--fs-caption);
 }
-.quotes__body { max-width: 760px; margin-left: clamp(2rem, 1rem + 4vw, 5rem); margin-top: var(--space-6); }
+/* margin-left en 0: el offset ya lo da el padding-left del slide (--reading-axis);
+   un margin propio duplicaba el corrimiento y desalineaba el texto del eje. */
+.quotes__body { max-width: 760px; margin-left: 0; margin-top: var(--space-6); }
 .quotes__quote {
   font-family: var(--font-display); font-size: var(--fs-quote); font-weight: 600; line-height: var(--lh-base);
   color: var(--slide-accent); margin-bottom: var(--space-5);
@@ -778,7 +808,7 @@ body:not(.is-loading) .hero__title-line--bold .word {
 }
 .quotes__tab:hover { width: 42px; }
 
-.quotes__nav { position: absolute; left: clamp(2rem, 1rem + 4vw, 5rem); bottom: var(--space-7); display: flex; gap: var(--space-3); z-index: 4; color: var(--slide-fg); }
+.quotes__nav { position: absolute; left: var(--reading-axis); bottom: var(--space-7); display: flex; gap: var(--space-3); z-index: 4; color: var(--slide-fg); }
 .quotes__arrow {
   width: 38px; height: 38px; border-radius: 50%; border: 1px solid currentColor;
   display: flex; align-items: center; justify-content: center;
@@ -788,9 +818,10 @@ body:not(.is-loading) .hero__title-line--bold .word {
 .quotes__arrow svg { width: 16px; height: 16px; }
 
 @media (max-width: 767px) {
-  /* el riel de tabs verticales (22px) queda reservado a la derecha para que el texto no lo pise */
-  .quotes__slide { padding-left: var(--container-padding-x); padding-right: calc(var(--container-padding-x) + 36px); }
-  .quotes__body { margin-left: var(--space-6); }
+  /* el riel de tabs verticales (22px) queda reservado a la derecha para que el texto no lo pise.
+     padding-left ya no se pisa acá: --reading-axis colapsa solo a --container-padding-x
+     por debajo de 1440px, así que el valor base ya es el correcto en mobile. */
+  .quotes__slide { padding-right: calc(var(--reading-axis) + 36px); }
   .quotes__author { font-size: 0.65rem; }
   .quotes__tabs .quotes__tab { width: 22px; font-size: 0.55rem; }
 }
@@ -1013,6 +1044,27 @@ body:not(.is-loading) .hero__title-line--bold .word {
   .mostra__grid, .mostra__pullquote { max-width: none; }
   .mostra__col .text-body + .text-body { margin-top: var(--space-3); }
   .mostra__cta-frame { width: clamp(280px, 84vw, 560px); }
+}
+
+/* ---------- 10b. DISPLAY BANNER — frase editorial entre Mostrá y Aprendé ----------
+   Mismo patrón que .quotes (fondo negro, texto grande + columna lateral), pero
+   estático (sin carrusel): título con .text-display (misma escala que el resto
+   de la landing) + aside con .text-body/.text-caption. */
+.display-banner { background: var(--color-black); color: var(--color-white); padding-block: var(--section-padding-y); overflow: hidden; }
+.display-banner__grid { display: flex; align-items: center; justify-content: space-between; gap: var(--space-9); }
+.display-banner__title { flex: 1 1 auto; }
+.display-banner__aside {
+  flex: 0 0 auto; width: min(32ch, 34%);
+  display: flex; flex-direction: column; gap: var(--space-7);
+}
+.display-banner__lead { opacity: 0.85; }
+.display-banner__quote { opacity: 0.85; }
+.display-banner__quote p { font-style: italic; margin: 0 0 var(--space-2); }
+.display-banner__quote cite { display: block; font-weight: 700; font-style: normal; }
+
+@media (max-width: 1023px) {
+  .display-banner__grid { flex-direction: column; align-items: flex-start; gap: var(--space-6); }
+  .display-banner__aside { width: 100%; }
 }
 
 /* ---------- 11. 04 APRENDÉ — bandas escalonadas (grilla + recorte curvo) ---------- */
