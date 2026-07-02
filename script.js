@@ -47,6 +47,7 @@
     initReveal();
     initMira();
     initCrea();
+    initCreaPopup();
     initQuotes();
     initMostraHscroll();
     initNewsletter();
@@ -329,6 +330,35 @@
     list.addEventListener("pointercancel", stopDrag);
 
     render();
+  }
+
+  /* ---------- Popup "Próximo taller" (Creá) ----------
+     Se abre solo una vez, la primera vez que la sección Creá entra en el
+     viewport (IntersectionObserver, se desconecta después del primer disparo).
+     Reutiliza registerOverlay() (misma API que porcolor/porautor/porano: Escape,
+     foco, body.overlay-open) aunque acá no hay un trigger de click —el "open"
+     lo dispara el observer— por eso el selector de apertura no matchea nada. */
+  function initCreaPopup() {
+    const popup = document.querySelector("[data-crea-popup]");
+    const creaSection = document.getElementById("crea");
+    if (!popup || !creaSection) return;
+
+    const overlay = registerOverlay(popup, "[data-crea-popup-open]");
+    const backdrop = popup.querySelector("[data-crea-popup-backdrop]");
+    backdrop && backdrop.addEventListener("click", overlay.close);
+
+    if (!("IntersectionObserver" in window)) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          overlay.open();
+          io.disconnect();
+        });
+      },
+      { threshold: 0.3 }
+    );
+    io.observe(creaSection);
   }
 
   /* ---------- Frases: carrusel en capas ---------- */
@@ -1123,6 +1153,21 @@
       { letra: "Z", autores: ["francisco-de-zurbaran", "zhang-daqian", "zao-wou-ki"] },
     ];
 
+    // Retratos en img/artistas/: por defecto <id>.png, pero varios archivos
+    // reales usan nombres cortos o con detalles en vez del slug completo del
+    // autor (ver carpeta). Excepciones puntuales acá; el resto cae al default.
+    const RETRATOS = {
+      "salvador-dali": "dali.png",
+      "pablo-picasso": "picasso.png",
+      "vincent-van-gogh": "van gogh.png",
+      "jackson-pollock": "pollok.png",
+      "claude-monet": "monet.png",
+      "marcel-duchamp": "duchamp.png",
+      "wassily-kandinsky": "kandisky.png",
+      "edvard-munch": "munch.png",
+      "henri-matisse": "matisse.png",
+    };
+
     const indexEl = overlay.querySelector("[data-porautor-index]");
     const ficha = overlay.querySelector("[data-porautor-ficha]");
     const fa = {
@@ -1174,15 +1219,17 @@
         fa.nac.textContent = a.nacionalidad;
         fa.name.textContent = a.nombre;
         fa.bio.innerHTML = a.biografia.map((p) => `<p class="text-body">${p}</p>`).join("");
-        if (a.imagen) {
-          fa.img.style.opacity = "0";
-          fa.img.onload = () => { fa.img.style.opacity = "1"; };
-          fa.img.onerror = () => { fa.img.style.opacity = "0"; };
-          fa.img.src = encodeURI(`img/por-autor/${a.imagen}`);
-          fa.img.alt = `Retrato de ${a.nombre}`;
-        } else {
-          fa.img.removeAttribute("src"); fa.img.style.opacity = "0"; fa.img.alt = "";
-        }
+        // Retrato: misma convención que RETRATOS (img/artistas/, <id>.png por
+        // defecto salvo excepción). fa.img es un único <img> reutilizado en
+        // cada cambio de autor —no se puede remover del DOM como en el índice—
+        // así que onerror solo la oculta (opacity:0), dejando que la ficha de
+        // texto fluya normal sin recuadro roto.
+        const fileName = RETRATOS[id] || `${id}.png`;
+        fa.img.style.opacity = "0";
+        fa.img.onload = () => { fa.img.style.opacity = "1"; };
+        fa.img.onerror = () => { fa.img.style.opacity = "0"; };
+        fa.img.src = encodeURI(`img/artistas/${fileName}`);
+        fa.img.alt = `Retrato de ${a.nombre}`;
         ficha.classList.remove("is-swapping");
       }, 150);
     }

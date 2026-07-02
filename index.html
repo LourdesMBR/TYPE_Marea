@@ -34,7 +34,6 @@
   <symbol id="icon-abba" viewBox="0 0 24 24" fill="none"><rect x="3.5" y="3.5" width="17" height="17" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M8 7.5v9M12 7.5v9M16 7.5v9" stroke="currentColor" stroke-width="1.5"/></symbol>
 </svg>
 
-<a class="skip-link" href="#main">Saltar al contenido</a>
 
 <!-- Cursor personalizado (circle-follow): se activa solo en desktop con mouse fino — ver initCursor() -->
 <div class="cursor" data-cursor aria-hidden="true">
@@ -98,7 +97,6 @@
       <div class="hscroll__viewport">
 
         <div class="mira-bar" data-hscroll-nav aria-label="Línea de tiempo Renacimiento y Barroco">
-          <p class="eyebrow mira-bar__index" data-hscroll-index>01.</p>
           <div class="mira-bar__tabs">
             <div class="mira-bar__tab" data-era="renacimiento">
               <button type="button" data-bar-toggle aria-expanded="false">Renacimiento<svg aria-hidden="true"><use href="#icon-chevron-down"/></svg></button>
@@ -122,6 +120,8 @@
 
           <article class="mira-panel mira-panel--intro" data-panel="intro" data-index="01." data-reveal>
             <div class="mira-intro__head">
+                        <p class="eyebrow mira-bar__index" data-hscroll-index>01.</p>
+
               <h3 class="text-h1">Mirá</h3>
               <p class="text-body">La pintura, a través del tiempo, es un arte que ha evolucionado con el hombre y a lo largo de cientos de años ha marcado la historia y la cultura de la humanidad.</p>
             </div>
@@ -393,6 +393,31 @@
     </div>
   </section>
 
+  <!-- Popup "Próximo taller": se abre solo la primera vez que Creá entra en
+       viewport (ver initCreaPopup en script.js). Mismos datos que la primera
+       crea-card del deck. El rectángulo .crea-popup__media es el placeholder
+       de imagen. -->
+  <div class="crea-popup" data-crea-popup aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="crea-popup-title">
+    <button type="button" class="crea-popup__backdrop" data-crea-popup-backdrop aria-label="Cerrar" tabindex="-1"></button>
+    <div class="crea-popup__body">
+      <button type="button" class="crea-popup__close" data-overlay-close aria-label="Cerrar">
+        <svg aria-hidden="true"><use href="#icon-close"/></svg>
+      </button>
+      <div class="crea-popup__card">
+        <p class="crea-popup__day">Lun</p>
+        <p class="crea-popup__date"><strong>22</strong> JUN</p>
+        <h3 id="crea-popup-title" class="text-h3">Taller Ilustrar sueños</h3>
+        <p class="text-body">Un taller para explorar la ilustración narrativa a partir de sueños, recuerdos e imaginación. A través de ejercicios y búsquedas visuales, cada participante desarrollará una pieza propia inspirada en escenas reales o imaginadas. No se requiere experiencia previa.</p>
+        <div class="crea-popup__meta">
+          <span><svg aria-hidden="true"><use href="#icon-clock"/></svg>22/06/2026 · 10:00 am</span>
+          <span><svg aria-hidden="true"><use href="#icon-pin"/></svg>Prisma, Amigos del Bellas Artes - Av. Figueroa Alcorta 2270</span>
+        </div>
+      </div>
+      <div class="crea-popup__media" aria-hidden="true"></div>
+    </div>
+    <p class="crea-popup__label" aria-hidden="true">próximo taller</p>
+  </div>
+
   <!-- SECCIÓN DE FRASES -->
   <section class="quotes" data-quotes aria-roledescription="carrusel de citas" aria-label="Frases sobre el arte">
     <div class="quotes__slide" data-slide="0" data-pos="active" style="--slide-bg:var(--color-black); --slide-fg:var(--color-white); --slide-accent:var(--color-lime);">
@@ -601,7 +626,7 @@
       <div class="aprende-band aprende-band--lime aprende-band--desc">
         <div class="aprende-band__shelf"></div>
         <div class="aprende-band__head"  style="border-top-left-radius: 20px!important;">
-          <span class="aprende-band__label" data-porcolor-open role="button" tabindex="0" aria-label="Abrir Aprendé por autor">Por autor</span>
+          <span class="aprende-band__label" data-porcolor-open role="button" tabindex="0" aria-label="Abrir Aprendé por color">Por autor</span>
           <a class="link-cta" href="##por-autor" data-porcolor-open>Ver más<svg aria-hidden="true"><use href="#icon-arrow"/></svg></a>
         </div>
       </div>
@@ -700,10 +725,10 @@
           </p>
           <h4 class="porautor__name" data-fa-name></h4>
         </div>
-        <div class="porautor__bio" data-fa-bio></div>
         <div class="porautor__portrait">
           <img data-fa-img src="" alt="" decoding="async">
         </div>
+        <div class="porautor__bio" data-fa-bio></div>
       </div>
     </div>
   </section>

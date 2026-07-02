@@ -738,6 +738,94 @@ body:not(.is-loading) .hero__title-line--bold .word {
   .crea-card .text-body { font-size: 0.88rem; }
 }
 
+/* ---------- 8b. POPUP "PRÓXIMO TALLER" (Creá) ----------
+   Modal que atenúa la landing al 50% negro; se abre una vez al entrar Creá
+   en viewport (ver initCreaPopup en script.js). Reutiliza tipografía/espaciado
+   del sistema (.text-h3, .text-body, --space-*, --fs-*); .crea-popup__media
+   es el placeholder de imagen (por ahora, un color plano). */
+.crea-popup {
+  position: fixed; inset: 0; z-index: var(--z-overlay);
+  display: flex; align-items: center; justify-content: center;
+  padding: var(--space-7) var(--container-padding-x);
+  opacity: 0; visibility: hidden;
+  transition: opacity var(--dur-base) var(--ease-out), visibility var(--dur-base);
+}
+.crea-popup.is-open { opacity: 1; visibility: visible; }
+.crea-popup__backdrop {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.5); border: 0; cursor: pointer;
+}
+
+.crea-popup__body {
+  position: relative; z-index: 1;
+  display: flex; align-items: stretch; gap: var(--space-5);
+  max-width: 760px; width: 100%;
+  transform: translateY(16px);
+  transition: transform var(--dur-base) var(--ease-out);
+}
+.crea-popup.is-open .crea-popup__body { transform: none; }
+
+.crea-popup__card {
+  flex: 1 1 60%; min-width: 0;
+  background: var(--color-white); color: var(--color-black);
+  border-radius: 28px; padding: var(--space-7) var(--space-6);
+  display: flex; flex-direction: column;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.35);
+}
+.crea-popup__day { font-family: var(--font-body); opacity: 0.6; }
+.crea-popup__date { font-family: var(--font-display); font-size: 2.6rem; line-height: 1; margin-block: 2px var(--space-4); }
+.crea-popup__date strong { font-weight: 700; }
+.crea-popup__card .text-h3 { margin-bottom: var(--space-3); }
+.crea-popup__card .text-body { opacity: 0.85; }
+.crea-popup__meta {
+  display: flex; flex-direction: column; gap: var(--space-2);
+  margin-top: var(--space-5); padding-top: var(--space-4);
+  border-top: 1px solid rgba(0,0,0,0.1);
+  font-size: var(--fs-caption); opacity: 0.75;
+}
+.crea-popup__meta span { display: flex; align-items: center; gap: var(--space-2); }
+.crea-popup__meta svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+/* placeholder de imagen: color plano por ahora (--color-turquoise es, pese al
+   nombre, el rosa/fucsia #F137A5 del sistema — el mismo del botón primario) */
+.crea-popup__media {
+  flex: 1 1 34%; min-width: 140px;
+  background: var(--color-turquoise);
+  border-radius: 28px;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.35);
+}
+
+.crea-popup__close {
+  position: absolute; top: calc(-1 * var(--space-7)); right: 0; z-index: 2;
+  width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center;
+  border: 1.5px solid var(--color-white); border-radius: var(--radius-pill);
+  color: var(--color-white); background: transparent;
+  transition: background-color var(--dur-fast);
+}
+.crea-popup__close:hover { background: rgba(255,255,255,0.15); }
+.crea-popup__close svg { width: 18px; height: 18px; }
+
+/* "próximo taller": texto grande detrás de la tarjeta —el borde inferior de
+   la tarjeta tapa la parte de arriba de las letras (z-index)—, blanco para
+   leerse sobre el fondo atenuado. */
+.crea-popup__label {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 0;
+  transform: translateY(55%);
+  font-family: var(--font-display); font-weight: 800;
+  font-size: clamp(2.25rem, 1.2rem + 5vw, 4.5rem); line-height: 1;
+  color: var(--color-white); text-align: center;
+  pointer-events: none;
+}
+
+@media (max-width: 767px) {
+  .crea-popup { padding: var(--space-6) var(--container-padding-x); }
+  .crea-popup__body { flex-direction: column; max-width: 420px; }
+  .crea-popup__card { padding: var(--space-6) var(--space-5); }
+  .crea-popup__media { min-height: 140px; }
+  .crea-popup__close { top: calc(-1 * var(--space-6)); }
+  .crea-popup__label { font-size: clamp(1.75rem, 1.2rem + 4vw, 2.75rem); transform: translateY(65%); }
+}
+
 /* ---------- 9. FRASES (quotes) ---------- */
 .quotes {
   position: relative; height: clamp(560px, 78vh, 760px); overflow: hidden;
@@ -1373,7 +1461,8 @@ body.overlay-open { overflow: hidden; }
 
 /* ficha: izquierda (meta + nombre + retrato), derecha (biografía), con fade al cambiar.
    Áreas nombradas: en desktop el nombre va arriba-izq, el retrato debajo, la bio a la
-   derecha ocupando ambas filas. En mobile se apilan: nombre → bio → retrato. */
+   derecha ocupando ambas filas. En mobile se apilan: nombre → retrato → bio (el retrato
+   queda siempre pegado al nombre, tanto en el DOM —ver index.html— como visualmente). */
 .porautor__ficha {
   display: grid; grid-template-columns: 1fr 1fr;
   grid-template-areas: "head bio" "portrait bio";
@@ -1397,7 +1486,7 @@ body.overlay-open { overflow: hidden; }
 @media (max-width: 900px) {
   .porautor__ficha {
     grid-template-columns: 1fr;
-    grid-template-areas: "head" "bio" "portrait";
+    grid-template-areas: "head" "portrait" "bio";
     gap: var(--space-6);
   }
   .porautor__name { font-size: var(--fs-h1); }
