@@ -322,11 +322,7 @@ body:not(.is-loading) .hero__watermark { opacity: 1; }
 }
 @keyframes watermark-breathe { 0%, 100% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.025) rotate(0.4deg); } }
 
-/* sin max-width propio: .hero__inner ya es .container (max-width:1440 +
-   margin-inline:auto), que es lo que lo alinea al eje de lectura en cualquier
-   ancho. Ponerle un max-width menor acá centraba la caja entera (auto-margin)
-   en vez de dejarla pegada al padding izquierdo, como el resto de los títulos. */
-.hero__inner { position: relative; z-index: 1; }
+.hero__inner { position: relative; z-index: 1; max-width: 920px; }
 
 .hero__eyebrow, .hero__title, .hero__lead, .hero__ctas {
   opacity: 0; transform: translateY(18px);
@@ -1390,7 +1386,7 @@ body.overlay-open { overflow: hidden; }
 .porautor__portrait { grid-area: portrait; }
 
 .porautor__meta { display: flex; gap: var(--space-6); font-size: var(--fs-caption); margin-bottom: var(--space-5); }
-.porautor__name { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-display); line-height: var(--lh-base); color: var(--color-magenta); }
+.porautor__name { font-family: var(--fs-h2); font-weight: 700; font-size: var(--fs-h2); line-height: var(--lh-base); color: var(--color-magenta); }
 .porautor__portrait { display: flex; align-items: flex-start; }
 .porautor__portrait img {
   width: 100%; max-width: 420px; height: auto; object-fit: contain;
