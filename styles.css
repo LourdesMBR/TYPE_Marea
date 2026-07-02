@@ -302,7 +302,7 @@ noscript .mira-typing-line { width: auto !important; border-right: 0 !important;
 /* ---------- 5. HERO ---------- */
 .hero {
   position: relative; overflow: hidden;
-  padding-block: clamp(4rem, 3rem + 8vw, 9rem) clamp(3rem, 2rem + 6vw, 6rem);
+  padding-block: clamp(10rem, 3rem + 8vw, 9rem) clamp(6rem, 2rem + 15vw, 18rem);
   background: var(--color-white);
 }
 .hero__watermark {
@@ -862,6 +862,8 @@ body:not(.is-loading) .hero__title-line--bold .word {
   [data-mpanel="obra-2"] .mostra-panel__media { flex-basis: 27.6%; } /* historia-02.jpg al 60% */
   [data-mpanel="obra-3"] .mostra-panel__media { flex-basis: 23%; } /* historia-04.jpg al 50% */
   [data-mpanel="obra-4"] .mostra-panel__media { flex-basis: 18.4%; } /* historia-03.jpg al 40% */
+  
+  [data-mpanel="obra-5"] .mostra-panel__media { flex-basis: 18.4%; } /* historia-03.jpg al 40% */
 }
 /* sangrado vertical para el parallax: top/left + width/height explícitos (no el
    shorthand "inset"), igual que el de Mirá — en un <img> (elemento reemplazado),
@@ -1052,7 +1054,6 @@ body:not(.is-loading) .hero__title-line--bold .word {
   .aprende-band:hover {
     transform: var(--band-rise);
     z-index: 5;
-    filter: drop-shadow(0 16px 26px rgba(0, 0, 0, 0.22));
   }
 
   /* Caso 1 — banda envuelta: si la banda hovereada vive dentro de un div de
