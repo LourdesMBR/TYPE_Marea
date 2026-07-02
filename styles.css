@@ -655,6 +655,7 @@ body:not(.is-loading) .hero__title-line--bold .word {
 .marquee--black { background: var(--color-black); color: var(--color-white); }
 .marquee__track {
   display: inline-flex; width: max-content;
+  will-change: transform;
   animation: marquee var(--dur-marquee) linear infinite;
 }
 .marquee:hover .marquee__track { animation-play-state: paused; }

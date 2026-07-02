@@ -55,6 +55,12 @@
     initAuthorExplorer();
     initYearExplorer();
     initOverlayGlobals();
+    initMarquees();
+
+    window.addEventListener("load", initMarquees);
+    if (document.fonts) {
+      document.fonts.ready.then(initMarquees);
+    }
 
     window.addEventListener("resize", debounce(() => {
       readCaps();
@@ -62,6 +68,7 @@
       refreshMira();
       refreshMostra();
       cursor?.refresh();
+      initMarquees();
     }, 200));
   });
 
@@ -588,6 +595,41 @@
         button.disabled = false;
         button.innerHTML = originalLabel;
       }, 2400);
+    });
+  }
+
+  /* ---------- Marquees ---------- */
+  function initMarquees() {
+    const marquees = document.querySelectorAll("[data-marquee]");
+    marquees.forEach((marquee) => {
+      const track = marquee.querySelector(".marquee__track");
+      if (!track) return;
+
+      // Guardar el HTML original si aún no se guardó
+      if (!marquee.dataset.originalHtml) {
+        marquee.dataset.originalHtml = track.innerHTML;
+      }
+
+      // Restaurar el HTML original para medir el ancho base correctamente
+      track.innerHTML = marquee.dataset.originalHtml;
+
+      const containerWidth = marquee.offsetWidth;
+      const originalWidth = track.scrollWidth;
+
+      if (originalWidth === 0) return;
+
+      // Calcular cuántas veces necesitamos repetir el contenido para llenar la pantalla
+      // Sumamos 1 por seguridad
+      const repetitions = Math.ceil(containerWidth / originalWidth) + 1;
+
+      const originalItemsHtml = marquee.dataset.originalHtml;
+      let repeatedHtml = "";
+      for (let i = 0; i < repetitions; i++) {
+        repeatedHtml += originalItemsHtml;
+      }
+
+      // El track contiene dos bloques idénticos: el original repetido y su clon
+      track.innerHTML = repeatedHtml + repeatedHtml;
     });
   }
 
