@@ -649,15 +649,38 @@ body:not(.is-loading) .hero__title-line--bold .word {
      offset de un position:relative, tiraban el texto fuera de la pantalla. */
   .mira-intro__subtitle { position: relative; top: auto; left: auto; z-index: 2; margin-top: -82px; }
 }
+/* Ubicación de la foto debajo del nombre del artista */
+.porautor__ficha .porautor__portrait {
+  grid-area: portrait;
+  display: flex;
+  justify-content: flex-start;
+  margin-top: var(--space-4);
+  width: 100%;
+  max-width: 420px;
+}
 
+.porautor__ficha .porautor__portrait img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
 /* ---------- 7. MARQUEES ---------- */
 .marquee { overflow: hidden; white-space: nowrap; }
 .marquee--lime { background: var(--color-lime); color: var(--color-black); }
 .marquee--black { background: var(--color-black); color: var(--color-white); }
 .marquee__track {
-  display: inline-flex; width: max-content;
+  display: flex; 
+  width: max-content;
   will-change: transform;
   animation: marquee var(--dur-marquee) linear infinite;
+}
+
+@keyframes marquee { 
+  from { transform: translateX(0%); } 
+  to { transform: translateX(-50%); } 
 }
 .marquee:hover .marquee__track { animation-play-state: paused; }
 .marquee__item {
@@ -747,6 +770,7 @@ body:not(.is-loading) .hero__title-line--bold .word {
   position: fixed; inset: 0; z-index: var(--z-overlay);
   display: flex; align-items: center; justify-content: center;
   padding: var(--space-7) var(--container-padding-x);
+  overflow-y: auto; /* viewports muy bajos (mobile horizontal): scrollea en vez de recortar */
   opacity: 0; visibility: hidden;
   transition: opacity var(--dur-base) var(--ease-out), visibility var(--dur-base);
 }
@@ -766,10 +790,15 @@ body:not(.is-loading) .hero__title-line--bold .word {
 .crea-popup.is-open .crea-popup__body { transform: none; }
 
 .crea-popup__card {
-  flex: 1 1 60%; min-width: 0;
-  background: var(--color-white); color: var(--color-black);
-  border-radius: 28px; padding: var(--space-7) var(--space-6);
-  display: flex; flex-direction: column;
+  flex: 1 1 60%; 
+  min-width: 0;
+  background: var(--color-white); 
+  color: var(--color-black);
+  border-radius: 28px; 
+  padding: var(--space-7) var(--space-6);
+  display: flex; 
+  flex-direction: column;
+  position: relative; /* Clave para que el botón de cierre se ancle de manera relativa a la tarjeta */
   box-shadow: 0 30px 60px rgba(0,0,0,0.35);
 }
 .crea-popup__day { font-family: var(--font-body); opacity: 0.6; }
@@ -782,10 +811,48 @@ body:not(.is-loading) .hero__title-line--bold .word {
   margin-top: var(--space-5); padding-top: var(--space-4);
   border-top: 1px solid rgba(0,0,0,0.1);
   font-size: var(--fs-caption); opacity: 0.75;
+  margin-bottom: 20px;
 }
 .crea-popup__meta span { display: flex; align-items: center; gap: var(--space-2); }
 .crea-popup__meta svg { width: 15px; height: 15px; flex-shrink: 0; }
+/* El contenedor principal de la fila se convierte en Flexbox */
+.crea-popup__row {
+  display: flex;
+  gap: 30px; /* Espacio de separación entre el texto y la foto */
+  align-items: center; /* Centra verticalmente el contenido si la foto es más alta */
+  margin-bottom: 40px; /* Separación entre una fila y otra */
+}
 
+/* Columna de texto toma más espacio (60%) */
+.crea-popup__content {
+  flex: 6;
+}
+
+/* Columna de la imagen toma el resto (40%) */
+.crea-popup__image {
+  flex: 4;
+}
+
+/* Asegura que la foto sea responsive y se adapte a su columna */
+.crea-popup__image img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px; /* Opcional: le da bordes suaves a la foto */
+  object-fit: cover; /* Evita que la foto se deforme si tiene proporciones fijas */
+}
+
+/* Responsive: En celulares las columnas se apilan verticalmente */
+@media (max-width: 768px) {
+  .crea-popup__row {
+    flex-direction: column;
+  }
+  
+  .crea-popup__image {
+    order: -1; /* Opcional: pone la foto ARRIBA del texto en móviles */
+    width: 100%;
+  }
+}
 /* placeholder de imagen: color plano por ahora (--color-turquoise es, pese al
    nombre, el rosa/fucsia #F137A5 del sistema — el mismo del botón primario) */
 .crea-popup__media {
@@ -796,34 +863,60 @@ body:not(.is-loading) .hero__title-line--bold .word {
 }
 
 .crea-popup__close {
-  position: absolute; top: calc(-1 * var(--space-7)); right: 0; z-index: 2;
-  width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center;
-  border: 1.5px solid var(--color-white); border-radius: var(--radius-pill);
-  color: var(--color-white); background: transparent;
-  transition: background-color var(--dur-fast);
+  position: absolute; 
+  top: var(--space-4); 
+  right: var(--space-4); 
+  z-index: 10;
+  width: 36px; 
+  height: 36px; 
+  display: inline-flex; 
+  align-items: center; 
+  justify-content: center;
+  border: 1px solid rgba(0, 0, 0, 0.2); 
+  border-radius: var(--radius-pill);
+  color: var(--color-black); 
+  background: transparent;
+  transition: background-color var(--dur-fast), transform var(--dur-fast);
 }
-.crea-popup__close:hover { background: rgba(255,255,255,0.15); }
-.crea-popup__close svg { width: 18px; height: 18px; }
 
-/* "próximo taller": texto grande detrás de la tarjeta —el borde inferior de
-   la tarjeta tapa la parte de arriba de las letras (z-index)—, blanco para
-   leerse sobre el fondo atenuado. */
+.crea-popup__close:hover { 
+  background: rgba(0, 0, 0, 0.05); 
+  transform: scale(1.05);
+}
+
+.crea-popup__close svg { 
+  width: 14px; 
+  height: 14px; 
+}
+
+/* "próximo taller": texto grande detrás de la tarjeta —positioned dentro de
+   .crea-popup__body para anclarse a SU borde inferior (el de la tarjeta+
+   imagen), no al del popup entero—. z-index 0 (por debajo de card/media) para
+   que el borde inferior de la tarjeta tape apenas la punta de las letras;
+   blanco para leerse sobre el fondo atenuado. */
 .crea-popup__label {
-  position: absolute; left: 0; right: 0; bottom: 0; z-index: 0;
-  transform: translateY(55%);
-  font-family: var(--font-display); font-weight: 800;
-  font-size: clamp(2.25rem, 1.2rem + 5vw, 4.5rem); line-height: 1;
-  color: var(--color-white); text-align: center;
+  position: absolute; 
+  left: 0; 
+  right: 0; 
+  bottom: 0; 
+  z-index: 0;
+transform: translateX(20%) translateY(20%); /* Empuja el texto hacia abajo y a la derecha */
+  font-family: var(--font-display); 
+  font-weight: 800;
+  font-size: clamp(2.25rem, 1.2rem + 5vw, 4.5rem); 
+  line-height: 1;
+  color: var(--color-black); 
+  text-align: center;
   pointer-events: none;
 }
 
 @media (max-width: 767px) {
   .crea-popup { padding: var(--space-6) var(--container-padding-x); }
   .crea-popup__body { flex-direction: column; max-width: 420px; }
-  .crea-popup__card { padding: var(--space-6) var(--space-5); }
+  .crea-popup__card { padding: var(--space-10) var(--space-10); }
   .crea-popup__media { min-height: 140px; }
   .crea-popup__close { top: calc(-1 * var(--space-6)); }
-  .crea-popup__label { font-size: clamp(1.75rem, 1.2rem + 4vw, 2.75rem); transform: translateY(65%); }
+  .crea-popup__label { font-size: clamp(1.75rem, 1.2rem + 4vw, 2.75rem); transform: translateY(80%); }
 }
 
 /* ---------- 9. FRASES (quotes) ---------- */
@@ -943,16 +1036,43 @@ body:not(.is-loading) .hero__title-line--bold .word {
    (imagen de marco en absolute + botón centrado encima), con Marco 02.svg —
    dibujado en negro, pensado para fondo blanco (a diferencia de Marco.svg, en
    blanco, para la banda de cierre que es negra). */
-.mostra__intro-row { display: flex; align-items: center; gap: var(--space-8); margin-block: var(--space-7) var(--space-8); }
+.mostra__intro-row { 
+  display: flex; 
+  align-items: center; 
+  gap: var(--space-6, 48px); 
+  margin-block: var(--space-7) var(--space-8); 
+  width: 100%;
+}
+
+/* Rediseño de columna del marco: más grande y con más jerarquía visual */
 .mostra__intro-frame {
-  position: relative; display: flex; align-items: center; justify-content: center;
-  flex: 1 1 40%; max-width: 420px; aspect-ratio: 663 / 511;
+  position: relative; 
+  display: flex; 
+  flex-direction: column;
+  align-items: center; 
+  justify-content: center;
+  flex: 0 0 45%; 
+  max-width: 45%; 
   color: var(--color-black);
 }
-.mostra__intro-frame-img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
-.mostra__intro-frame .btn { position: relative; z-index: 1; }
-.mostra__intro-text { flex: 1 1 60%; min-width: 0; }
 
+.mostra__intro-frame-img { 
+  width: 100%; 
+  height: auto; 
+  display: block; 
+  pointer-events: none; 
+}
+
+.mostra__intro-frame .btn { 
+  position: relative; 
+  z-index: 1; 
+}
+
+/* Ajuste proporcional de la columna de texto descriptivo */
+.mostra__intro-text { 
+  flex: 0 0 55%; 
+  max-width: 55%; 
+}
 .mostra__subtitle { margin-block: 0 var(--space-6); max-width: 30ch; }
 .mostra__grid { display: grid; grid-template-columns: 1fr; gap: var(--space-6); align-items: start; max-width: 56ch; }
 .mostra__col .text-body + .text-body { margin-top: var(--space-5); }
@@ -1252,15 +1372,16 @@ body:not(.is-loading) .hero__title-line--bold .word {
   padding-inline: var(--space-6) var(--container-padding-x);
   align-items: flex-end; text-align: right;
 }
-
-.aprende-band--white   { --band-bg: #ffffff;    }
+/* Se elimina visualmente la banda de 'Por estilo' */
+.aprende-band--white { display: none !important; }
 
 .aprende-band--lime    { --band-bg: var(--color-lime);    --band-fg: var(--color-black); }
 .aprende-band--black   { --band-bg: var(--color-black);   --band-fg: var(--color-white); }
+
+/* Cambia la banda 'Por año' a la paleta del Azul de la marca */
 .aprende-band--magenta {
-  --band-bg: var(--color-magenta); --band-fg: var(--color-white);
-  /* sin superposición con la negra: el cruce dejaba ver un recorte negro a través
-     de la esquina curva de la magenta (el border-radius la vuelve transparente ahí) */
+  --band-bg: var(--color-magenta); 
+  --band-fg: var(--color-white);
 }
 
 /* "Por color": sin relleno, solo texto flotando con aire generoso a cada lado */
@@ -1452,10 +1573,14 @@ body.overlay-open { overflow: hidden; }
 .porautor__author {
   text-align: left; font-size: var(--fs-body); line-height: 1.35;
   color: var(--color-black); cursor: pointer;
-  transition: color var(--dur-base) var(--ease-out);
+  transition: color var(--dur-base) var(--ease-out), font-size var(--dur-base) var(--ease-out);
 }
 .porautor__author:hover { color: var(--color-magenta); }
 .porautor__author.is-active { color: var(--color-magenta); font-weight: 700; }
+/* .has-photo lo pone showAuthor() cuando confirma (onload/onerror de fa.img)
+   que ese autor tiene retrato real en img/artistas/; si además está activo,
+   el nombre se ve un poco más grande. */
+.porautor__author.is-active.has-photo { font-size: 1.2rem; }
 
 .porautor__divider { border: 0; border-top: 1px solid rgba(0,0,0,0.18); margin-block: var(--space-8); }
 

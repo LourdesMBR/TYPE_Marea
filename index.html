@@ -397,27 +397,39 @@
        viewport (ver initCreaPopup en script.js). Mismos datos que la primera
        crea-card del deck. El rectángulo .crea-popup__media es el placeholder
        de imagen. -->
-  <div class="crea-popup" data-crea-popup aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="crea-popup-title">
-    <button type="button" class="crea-popup__backdrop" data-crea-popup-backdrop aria-label="Cerrar" tabindex="-1"></button>
-    <div class="crea-popup__body">
+<!-- Popup "Próximo taller" optimizado -->
+<div class="crea-popup" data-crea-popup aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="crea-popup-title">
+  <button type="button" class="crea-popup__backdrop" data-crea-popup-backdrop aria-label="Cerrar" tabindex="-1"></button>
+  
+  <div class="crea-popup__body">
+    <div class="crea-popup__card">
+      <!-- El botón de cierre se ubica aquí para que flote correctamente en la esquina -->
       <button type="button" class="crea-popup__close" data-overlay-close aria-label="Cerrar">
         <svg aria-hidden="true"><use href="#icon-close"/></svg>
       </button>
-      <div class="crea-popup__card">
-        <p class="crea-popup__day">Lun</p>
-        <p class="crea-popup__date"><strong>22</strong> JUN</p>
-        <h3 id="crea-popup-title" class="text-h3">Taller Ilustrar sueños</h3>
-        <p class="text-body">Un taller para explorar la ilustración narrativa a partir de sueños, recuerdos e imaginación. A través de ejercicios y búsquedas visuales, cada participante desarrollará una pieza propia inspirada en escenas reales o imaginadas. No se requiere experiencia previa.</p>
-        <div class="crea-popup__meta">
-          <span><svg aria-hidden="true"><use href="#icon-clock"/></svg>22/06/2026 · 10:00 am</span>
-          <span><svg aria-hidden="true"><use href="#icon-pin"/></svg>Prisma, Amigos del Bellas Artes - Av. Figueroa Alcorta 2270</span>
-        </div>
-      </div>
-      <div class="crea-popup__media" aria-hidden="true"></div>
-    </div>
+<row class="crea-popup__row">
+  <!-- Columna 1: Todo tu contenido de texto agrupado -->
+  <div class="crea-popup__content">
+    <p class="crea-popup__day">Lun</p>
+    <p class="crea-popup__date"><strong>22</strong> JUN</p>
+    <h3 id="crea-popup-title" class="text-h3">Taller Ilustrar sueños</h3>
+    <p class="text-body">Un taller para explorar la ilustración narrativa a partir de sueños, recuerdos e imaginación. A través de ejercicios y búsquedas visuales, cada participante desarrollará una pieza propia inspirada en escenas reales o imaginadas. No se requiere experiencia previa.</p>
     <p class="crea-popup__label" aria-hidden="true">próximo taller</p>
+    <div class="crea-popup__meta">
+      <span><svg aria-hidden="true"><use href="#icon-clock"/></svg>22/06/2026 · 10:00 am</span>
+      <span><svg aria-hidden="true"><use href="#icon-pin"/></svg>Prisma, Amigos del Bellas Artes - Av. Figueroa Alcorta 2270</span>
+    </div>
   </div>
 
+  <!-- Columna 2: La foto -->
+  <div class="crea-popup__image">
+    <img src="img/pincel.png" alt="Ilustración del taller">
+  </div>
+</row>
+    </div>
+    
+  </div>
+</div>
   <!-- SECCIÓN DE FRASES -->
   <section class="quotes" data-quotes aria-roledescription="carrusel de citas" aria-label="Frases sobre el arte">
     <div class="quotes__slide" data-slide="0" data-pos="active" style="--slide-bg:var(--color-black); --slide-fg:var(--color-white); --slide-accent:var(--color-lime);">
@@ -626,7 +638,7 @@
       <div class="aprende-band aprende-band--lime aprende-band--desc">
         <div class="aprende-band__shelf"></div>
         <div class="aprende-band__head"  style="border-top-left-radius: 20px!important;">
-          <span class="aprende-band__label" data-porcolor-open role="button" tabindex="0" aria-label="Abrir Aprendé por color">Por autor</span>
+          <span class="aprende-band__label" data-porcolor-open role="button" tabindex="0" aria-label="Abrir Aprendé por color">Por color</span>
           <a class="link-cta" href="##por-autor" data-porcolor-open>Ver más<svg aria-hidden="true"><use href="#icon-arrow"/></svg></a>
         </div>
       </div>

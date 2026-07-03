@@ -1223,11 +1223,16 @@
         // defecto salvo excepción). fa.img es un único <img> reutilizado en
         // cada cambio de autor —no se puede remover del DOM como en el índice—
         // así que onerror solo la oculta (opacity:0), dejando que la ficha de
-        // texto fluya normal sin recuadro roto.
+        // texto fluya normal sin recuadro roto. El resultado de la carga (éxito
+        // o error) es también la única forma confiable de saber si el autor
+        // tiene foto real, así que lo aprovechamos para marcar su botón en el
+        // índice (.has-photo) y que ese nombre se vea un poco más grande cuando
+        // está activo (ver CSS .porautor__author.is-active.has-photo).
+        const indexBtn = indexEl.querySelector(`.porautor__author[data-author="${id}"]`);
         const fileName = RETRATOS[id] || `${id}.png`;
         fa.img.style.opacity = "0";
-        fa.img.onload = () => { fa.img.style.opacity = "1"; };
-        fa.img.onerror = () => { fa.img.style.opacity = "0"; };
+        fa.img.onload = () => { fa.img.style.opacity = "1"; indexBtn?.classList.add("has-photo"); };
+        fa.img.onerror = () => { fa.img.style.opacity = "0"; indexBtn?.classList.remove("has-photo"); };
         fa.img.src = encodeURI(`img/artistas/${fileName}`);
         fa.img.alt = `Retrato de ${a.nombre}`;
         ficha.classList.remove("is-swapping");
